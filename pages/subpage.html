@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>通知设置 — Tacto UI</title>
+  <script>
+    (() => {
+      const forced = new URLSearchParams(location.search).get('theme');
+      const system = matchMedia('(prefers-color-scheme: dark)');
+      const sync = () => {
+        document.documentElement.dataset.theme = forced === 'light' || forced === 'dark'
+          ? forced : system.matches ? 'dark' : 'light';
+      };
+      sync();
+      system.addEventListener('change', sync);
+    })();
+  </script>
+  <link rel="stylesheet" href="../tokens/tokens.css">
+  <link rel="stylesheet" href="../components/base.css">
+  <link rel="stylesheet" href="../components/button.css">
+  <link rel="stylesheet" href="../components/list.css">
+  <link rel="stylesheet" href="../components/switch.css">
+  <link rel="stylesheet" href="../components/page-header.css">
+  <link rel="stylesheet" href="./subpage.css">
+</head>
+<body class="ui-subpage">
+  <a class="ui-skip" href="#main">跳到主要内容</a>
+  <header class="ui-sub-header">
+    <a class="ui-sub-header__back" href="../index.html#subpage" aria-label="返回组件总览">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m14 6-6 6 6 6"/></svg>
+    </a>
+    <h1 class="ui-sub-header__title" id="page-title">通知设置</h1>
+  </header>
+
+  <main class="ui-subpage__content" id="main" tabindex="-1" aria-labelledby="page-title">
+    <p class="ui-subpage__intro">选择你想收到的提醒。此示例只在当前浏览器保存设置。</p>
+    <form class="ui-stack" id="preferences" aria-label="通知选项">
+      <ul class="ui-list">
+        <li>
+          <label class="ui-row">
+            <span class="ui-row__copy">
+              <strong id="messages-label">私信提醒</strong>
+              <small id="messages-hint">收到新私信时通知我</small>
+            </span>
+            <span class="ui-switch">
+              <input type="checkbox" role="switch" name="messages" checked aria-labelledby="messages-label" aria-describedby="messages-hint">
+              <span class="ui-switch__track" aria-hidden="true"></span>
+            </span>
+          </label>
+        </li>
+        <li>
+          <label class="ui-row">
+            <span class="ui-row__copy">
+              <strong id="replies-label">回复与提及</strong>
+              <small id="replies-hint">有人回复我或提到我时通知</small>
+            </span>
+            <span class="ui-switch">
+              <input type="checkbox" role="switch" name="replies" checked aria-labelledby="replies-label" aria-describedby="replies-hint">
+              <span class="ui-switch__track" aria-hidden="true"></span>
+            </span>
+          </label>
+        </li>
+        <li>
+          <label class="ui-row">
+            <span class="ui-row__copy">
+              <strong id="updates-label">产品更新</strong>
+              <small id="updates-hint">接收新功能与使用方式的介绍</small>
+            </span>
+            <span class="ui-switch">
+              <input type="checkbox" role="switch" name="updates" aria-labelledby="updates-label" aria-describedby="updates-hint">
+              <span class="ui-switch__track" aria-hidden="true"></span>
+            </span>
+          </label>
+        </li>
+      </ul>
+      <button class="ui-btn ui-btn--primary ui-btn--block" type="submit">保存设置</button>
+      <p class="ui-subpage__status" id="save-status" role="status" aria-atomic="true"></p>
+    </form>
+  </main>
+
+  <script type="module">
+    const key = 'tacto-ui:subpage:notifications';
+    const form = document.getElementById('preferences');
+    const status = document.getElementById('save-status');
+    const controls = [...form.querySelectorAll('input[type="checkbox"]')];
+    try {
+      const saved = JSON.parse(localStorage.getItem(key));
+      controls.forEach((input) => {
+        if (typeof saved?.[input.name] === 'boolean') input.checked = saved[input.name];
+      });
+    } catch {
+      status.textContent = '无法读取已保存的设置，你仍可调整下方选项。';
+    }
+    form.addEventListener('change', () => {
+      status.setAttribute('role', 'status');
+      status.textContent = '有未保存的更改';
+    });
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      try {
+        localStorage.setItem(key, JSON.stringify(Object.fromEntries(controls.map((input) => [input.name, input.checked]))));
+        status.setAttribute('role', 'status');
+        status.textContent = '设置已保存到当前浏览器';
+      } catch {
+        status.setAttribute('role', 'alert');
+        status.textContent = '保存失败，请允许浏览器存储后重试。当前选择仍保留。';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -11,7 +11,8 @@ const root = path.resolve(import.meta.dirname, '..');
 const problems = [];
 
 const html = readFileSync(path.join(root, 'index.html'), 'utf8');
-const htmlFiles = ['index.html', ...readdirSync(path.join(root, 'test')).filter((name) => name.endsWith('.html')).map((name) => `test/${name}`)];
+const htmlFiles = ['index.html', ...['pages', 'test'].flatMap((dir) => readdirSync(path.join(root, dir))
+  .filter((name) => name.endsWith('.html')).map((name) => `${dir}/${name}`))];
 
 // —— 1. 样式文件齐全 ——
 for (const [, href] of html.matchAll(/<link[^>]+href="\.\/([^"]+\.css)"/g)) {
@@ -24,11 +25,11 @@ for (const [, spec] of html.matchAll(/from\s+'(\.[^']+\.js)'/g)) {
   if (!existsSync(target)) problems.push(`index.html 引用了不存在的模块：${spec}`);
 }
 
-// 测试页也属于交付：检查相对引用和内联脚本语法，运行时断言仍需在浏览器执行。
+// 页面模板与测试页也属于交付：检查相对引用和内联脚本语法，运行时断言仍需在浏览器执行。
 for (const file of htmlFiles) {
   const source = readFileSync(path.join(root, file), 'utf8');
-  for (const [, relative] of source.matchAll(/(?:href|src)="(\.[^"]+\.(?:css|js))"/g)) {
-    if (relative && !existsSync(path.resolve(root, path.dirname(file), relative))) problems.push(`${file} 缺少引用：${relative}`);
+  for (const [, relative] of source.matchAll(/(?:href|src)="(\.[^"]+\.(?:css|js|html)(?:[?#][^"]*)?)"/g)) {
+    if (!existsSync(path.resolve(root, path.dirname(file), relative.split(/[?#]/)[0]))) problems.push(`${file} 缺少引用：${relative}`);
   }
   for (const match of source.matchAll(/from\s+'(\.[^']+\.js)'/g)) {
     if (!existsSync(path.resolve(root, path.dirname(file), match[1]))) problems.push(`${file} 缺少模块：${match[1]}`);

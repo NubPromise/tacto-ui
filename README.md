@@ -35,7 +35,7 @@
 | 设计基础 | 颜色、排版、间距、深浅色、布局工具、焦点环 | 所有组件共享 `tokens/tokens.css` 与 `components/base.css` |
 | 基础组件 | 按钮、字段、开关、列表、对话框、底部面板、轻提示 | 按需加载组件 CSS，交互组件再接入行为模块 |
 | 场景组合 | 动态、评论、用户行、资料头、语音条、聊天气泡 | 按示例结构组合，并引入使用到的各组件样式 |
-| 页面模板 | 桌面双栏 / 移动单栏登录页 | 复用页面结构，接入自己的文案、校验和认证逻辑 |
+| 页面模板 | 桌面双栏 / 移动单栏登录页、统一子级页面 | 复用页面结构，接入自己的文案、校验和业务逻辑 |
 
 ## 快速开始
 
@@ -55,6 +55,7 @@ npm run dev
 | 组合示例 | [http://127.0.0.1:4173/test/components.html](http://127.0.0.1:4173/test/components.html) | 可操作的设置表单、内容互动，以及蓝色 / 紫色双品牌主题 |
 | 行为验证 | [http://127.0.0.1:4173/test/behaviors.html](http://127.0.0.1:4173/test/behaviors.html) | 焦点、键盘、下拉提交与取消等行为断言 |
 | 全局弹窗验证 | [http://127.0.0.1:4173/test/alerts.html](http://127.0.0.1:4173/test/alerts.html) | 确认结果、队列、关闭策略、焦点与长文案断言 |
+| 子级页面示例 | [http://127.0.0.1:4173/pages/subpage.html](http://127.0.0.1:4173/pages/subpage.html) | 顶栏仅返回键和标题，正文直接展示可保存的设置表单 |
 
 默认端口为 `4173`，可用 `npm run dev -- 4180` 指定其他端口。Node.js 仅用于本地工具；页面可部署到静态站点或集成到现有应用。
 
@@ -132,6 +133,14 @@ if (confirmed) {
 
 支持提示、成功、警告、错误与危险操作五种状态，连续调用依次显示。确认返回 `true`，取消 / Esc 返回 `false`，默认点击遮罩不关闭；关闭后自动清理并归还焦点。更多选项见[全局弹窗 API](docs/BEHAVIORS.md#alert--confirm-全局通用弹窗)。
 
+### 统一子级页面
+
+子级页面遵循固定结构：**顶栏只有返回键与标题，内容区不再出现标题块**。设置、编辑等操作直接放在正文中，保存按钮也放在正文。
+
+复制 [`pages/subpage.html`](pages/subpage.html) 与 [`pages/subpage.css`](pages/subpage.css)，按文件中的顺序加载令牌、基础样式、所用组件和页面样式。顶栏使用 `page-header.css` 的 `.ui-sub-header`，页面外层为 `.ui-subpage`、正文为 `.ui-subpage__content`；调整返回链接为实际父级地址，再替换表单内容即可。
+
+示例包含可用的返回链接、开关、本地保存与失败反馈，并支持系统主题和 `?theme=light|dark`。完整约束见[子级页面规范](docs/DESIGN.md#13-子级页面)，可复制的最小 HTML 见[页头组件](docs/COMPONENTS.md#pageheader-页头)。
+
 ## 切换主题与定制品牌
 
 深浅色通过 `<html>` 的 `data-theme` 属性驱动：
@@ -167,6 +176,7 @@ systemTheme.addEventListener('change', syncTheme);
 | 接入键盘、焦点、手势与生命周期 | [行为 API](docs/BEHAVIORS.md) |
 | 修改颜色、排版、玻璃与动效规则 | [设计规范](docs/DESIGN.md) |
 | 查看多个组件共用样式与主题的实例 | [组合示例源码](test/components.html) |
+| 接入只在顶栏显示标题的子级页面 | [子级页面规范](docs/DESIGN.md#13-子级页面) / [完整示例](pages/subpage.html) |
 | 了解版本变化与升级事项 | [更新日志](CHANGELOG.md) |
 | 报告问题或贡献改进 | [贡献指南](CONTRIBUTING.md) |
 
@@ -176,6 +186,8 @@ components/base.css     基础重置、排版、布局工具与焦点环
 components/*.css        按组件拆分的样式
 behaviors/*.js          可选交互模块，index.js 为统一导出入口
 pages/login.css         登录页模板
+pages/subpage.html      子级页完整示例（通知设置）
+pages/subpage.css       子级页正文与安全区布局
 docs/                   设计规范、组件文档、行为 API
 test/                   行为断言与真实 CSS 组合验证
 scripts/                本地预览与静态自检工具
@@ -203,9 +215,10 @@ npm run dev
 
 - [`test/behaviors.html`](test/behaviors.html)：焦点归还、滚动锁定、提示替换、键盘切换、下拉提交与取消等行为断言。
 - [`test/alerts.html`](test/alerts.html)：全局警告 / 确认的返回结果、队列、焦点、滚动锁、关闭策略与纯文本安全断言。
+- [`test/subpage.html`](test/subpage.html)：真实窄屏 / 宽屏视口中的顶栏结构、正文无标题、居中、安全区、长文案与设置保存断言。
 - [`test/components.html`](test/components.html)：使用真实 CSS 验证双品牌深浅色文字对比度、点击范围、布局隔离与表单行为，并提供可操作的组合示例。
 
-三页均以标题 `ALL_PASS` 为通过标志。静态自检与这些断言覆盖的具体项目见[贡献指南](CONTRIBUTING.md)；接入项目仍需验证自己的文案、内容和目标设备。
+四页均以标题 `ALL_PASS` 为通过标志。静态自检与这些断言覆盖的具体项目见[贡献指南](CONTRIBUTING.md)；接入项目仍需验证自己的文案、内容和目标设备。
 
 欢迎带着实际页面中的问题来改进组件、示例和文档。提交前请阅读[贡献指南](CONTRIBUTING.md)，并在[更新日志](CHANGELOG.md)的「未发布」部分记录变更。
 

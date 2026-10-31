@@ -201,6 +201,7 @@
       <a href="#viewer">图片查看</a>
       <a href="#bubble">对话气泡</a>
       <div class="spec-nav__group">页面模板</div>
+      <a href="#subpage">子级页面</a>
       <a href="#login">登录页</a>
       <a href="./test/components.html">组合与主题验证</a>
     </div>
@@ -1033,12 +1034,13 @@
       </div>
 
       <div class="demo">
-        <div class="demo__label"><span>顶部栏</span><code>.ui-topbar</code></div>
+        <div class="demo__label"><span>子级页顶栏 · 仅返回键与标题</span><code>.ui-sub-header</code></div>
         <div class="demo__body demo__body--plain">
-          <div class="ui-topbar" style="position:static">
-            <button class="ui-topbar__action" aria-label="返回">‹</button>
-            <span class="ui-topbar__title">页面标题</span>
-            <button class="ui-topbar__action" aria-label="更多">⋯</button>
+          <div class="ui-sub-header" style="position:static">
+            <a class="ui-sub-header__back" href="#dock" aria-label="返回导航示例">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m14 6-6 6 6 6"/></svg>
+            </a>
+            <span class="ui-sub-header__title">通知设置</span>
           </div>
         </div>
       </div>
@@ -1237,6 +1239,21 @@
           </div>
         </div>
       </div>
+    </section>
+
+    <!-- ============ 子级页面 ============ -->
+    <section class="spec-section" id="subpage">
+      <h2 class="spec-section__title">子级页面模板</h2>
+      <p class="spec-section__desc">顶栏只放返回键与居中的页面标题，正文直接展示内容，不再添加页面、分区或卡片标题。保存等操作放在正文中。</p>
+      <div class="demo">
+        <div class="demo__label"><span>完整通知设置示例</span><code>pages/subpage.html</code></div>
+        <div class="demo__body">
+          <a class="ui-btn ui-btn--primary" href="./pages/subpage.html">打开子级页面</a>
+          <a class="ui-btn" href="./pages/subpage.html?theme=dark">查看深色示例</a>
+          <a class="ui-btn" href="./test/subpage.html">运行子页验证</a>
+        </div>
+      </div>
+      <div class="spec-tip"><strong>接入：</strong>使用 <code>.ui-sub-header</code> + <code>.ui-subpage__content</code>，页面唯一的 <code>h1</code> 位于顶栏；不叠加一级页大标题或 <code>.ui-page</code>。完整示例可切换开关、保存设置并返回此处。<a href="./docs/DESIGN.md#13-子级页面">查看规范</a>。</div>
     </section>
 
     <!-- ============ 登录页 ============ -->

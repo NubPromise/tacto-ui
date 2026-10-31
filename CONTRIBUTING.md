@@ -14,7 +14,7 @@ npm run check
 
 ```bash
 npm run dev
-# 分别打开 /test/behaviors.html、/test/components.html、/test/alerts.html，标题都变成 ALL_PASS 才算通过
+# 打开 /test/behaviors.html、/test/components.html、/test/alerts.html、/test/subpage.html，标题均为 ALL_PASS 才算通过
 ```
 
 ## 改动约定
@@ -30,6 +30,8 @@ npm run dev
 5. 在 `CHANGELOG.md` 的「未发布」段落记一行
 
 **深色模式**必须同步验证。每个组件在 `html[data-theme='dark']` 下都要能看清。
+
+**子级页面**使用唯一的顶栏标题，顶栏仅返回控件和 `h1`，正文不放标题块。修改子页模板或页头样式时验证 `test/subpage.html`，具体约束见[子级页面规范](docs/DESIGN.md#13-子级页面)。
 
 **命名边界：** `.ui-cluster` 是布局工具，`.ui-row` 是列表导航行，两者不能共用选择器。修改主题时同时验证强调文字与实色背景上的文字，勿用同一个颜色承担相反的对比度需求。
 

@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tacto UI — 子级页面验证</title>
+  <link rel="stylesheet" href="../tokens/tokens.css">
+  <link rel="stylesheet" href="../components/base.css">
+</head>
+<body class="ui-page">
+  <h1 class="ui-h2">子级页面验证</h1>
+  <pre id="out"></pre>
+  <div style="overflow:auto"><iframe id="example" title="子级页面完整示例" style="height:640px;border:0"></iframe></div>
+  <script type="module">
+    const results = [];
+    const check = (name, value) => results.push(`${value ? 'PASS' : 'FAIL'} ${name}`);
+    const frame = document.getElementById('example');
+    const load = (theme, width) => new Promise((resolve, reject) => {
+      frame.style.width = `${width}px`;
+      const timeout = setTimeout(() => reject(new Error('示例加载超时')), 10000);
+      frame.addEventListener('load', () => { clearTimeout(timeout); resolve(frame.contentDocument); }, { once: true });
+      frame.src = `../pages/subpage.html?theme=${theme}`;
+    });
+    const key = 'tacto-ui:subpage:notifications';
+    let previous;
+    let storageRead = false;
+    try {
+      previous = localStorage.getItem(key);
+      storageRead = true;
+      for (const width of [320, 960]) {
+        for (const theme of ['light', 'dark']) {
+          const doc = await load(theme, width);
+          const view = frame.contentWindow;
+          const header = doc.querySelector('.ui-sub-header');
+          const title = header.querySelector('h1');
+          const back = header.querySelector('.ui-sub-header__back');
+          const main = doc.querySelector('main');
+          const prefix = `${width}px/${theme}`;
+          check(`${prefix} 真实 iframe 视口与主题生效`, view.innerWidth === width && doc.documentElement.dataset.theme === theme);
+          check(`${prefix} 顶栏只有返回键和一个 h1`, header.children.length === 2
+            && header.firstElementChild === back && header.lastElementChild === title);
+          check(`${prefix} 全页仅一个标题且内容区不存在标题块`, doc.querySelectorAll('h1,h2,h3,h4,h5,h6,[role="heading"]').length === 1
+            && !main.querySelector('.ui-page-title,.ui-section-title,.ui-list-label,h1,h2,h3,h4,h5,h6,[role="heading"]'));
+          const a = title.getBoundingClientRect();
+          check(`${prefix} 单侧返回键不使标题偏离页面中线`, Math.abs((a.left + a.right) / 2 - doc.documentElement.clientWidth / 2) < 1);
+          check(`${prefix} 返回键有名称、确定目标和 48px 点击区域`, !!back.getAttribute('aria-label')
+            && back.getAttribute('href') === '../index.html#subpage' && back.offsetWidth >= 48 && back.offsetHeight >= 48);
+          check(`${prefix} 正文不横向溢出且位于顶栏之后`, doc.documentElement.scrollWidth <= view.innerWidth
+            && main.getBoundingClientRect().top >= header.getBoundingClientRect().bottom);
+          const height = header.offsetHeight;
+          const padding = getComputedStyle(main).paddingTop;
+          doc.documentElement.style.setProperty('--safe-top', '24px');
+          check(`${prefix} 顶部安全区只由顶栏承担`, header.offsetHeight === height + 24 && getComputedStyle(main).paddingTop === padding);
+          doc.documentElement.style.removeProperty('--safe-top');
+          title.textContent = '很长的子级页面标题'.repeat(20);
+          check(`${prefix} 长标题省略且不挤压返回键`, title.scrollWidth > title.clientWidth
+            && getComputedStyle(title).textOverflow === 'ellipsis' && back.offsetWidth >= 48
+            && doc.documentElement.scrollWidth <= view.innerWidth);
+        }
+      }
+      let doc = await load('light', 390);
+      const input = doc.querySelector('[name="messages"]');
+      input.click();
+      const selected = input.checked;
+      check('更改设置后显示未保存反馈', doc.getElementById('save-status').textContent === '有未保存的更改');
+      doc.querySelector('[type="submit"]').click();
+      check('保存操作在正文执行且有状态反馈', JSON.parse(localStorage.getItem(key)).messages === selected
+        && doc.getElementById('save-status').textContent === '设置已保存到当前浏览器'
+        && doc.querySelector('.ui-sub-header').children.length === 2);
+      doc = await load('light', 390);
+      check('重新打开可还原保存的选项', doc.querySelector('[name="messages"]').checked === selected);
+    } catch (error) {
+      results.push(`FAIL 未预期异常：${error.message}`);
+    } finally {
+      if (storageRead) {
+        if (previous === null) localStorage.removeItem(key);
+        else localStorage.setItem(key, previous);
+      }
+    }
+    document.getElementById('out').textContent = results.join('\n');
+    document.title = results.some((line) => line.startsWith('FAIL')) ? 'FAILED' : 'ALL_PASS';
+  </script>
+</body>
+</html>

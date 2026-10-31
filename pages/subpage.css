@@ -1,0 +1,19 @@
+/* 子级页布局：顶部安全区由顶栏承担，正文直接承载内容，不预留大标题或底部导航。 */
+.ui-subpage { min-height: 100dvh; }
+.ui-subpage__content {
+  width: 100%;
+  max-width: 40rem;
+  margin-inline: auto;
+  padding: var(--page-top) var(--page-h) calc(var(--sp-8) + var(--safe-bottom));
+  overflow-wrap: anywhere;
+}
+.ui-subpage__intro {
+  margin-bottom: var(--sp-5);
+  color: var(--text-secondary);
+}
+.ui-subpage__status {
+  min-height: 1.65em;
+  font-size: var(--fs-body-small);
+  color: var(--text-secondary);
+}
+.ui-subpage__status[role='alert'] { color: var(--error); }

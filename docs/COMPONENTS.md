@@ -306,7 +306,41 @@
 | `.ui-page-title` | 一级页面大标题 |
 | `.ui-page-title__text` / `__sub` / `__actions` | 结构 |
 | `.ui-section-title` | 分区小标题 |
-| `.ui-sub-header` / `__title` | 二级页面紧凑标题 |
+| `.ui-sub-header` | 子级页吸顶顶栏，只放返回键和标题 |
+| `.ui-sub-header__back` / `__title` | 48px 返回控件 / 居中的唯一页面标题 |
+
+子级页再加载 `pages/subpage.css`：`.ui-subpage` 是页面外层，`.ui-subpage__content` 是正文容器。正文不放任何标题块，说明、字段标签与操作直接排列；`.ui-page-title` 仅用于一级页。完整规则见[子级页面规范](DESIGN.md#13-子级页面)。
+
+最小结构（保存为仓库根目录的 HTML 可直接预览；将 `href="./index.html"` 替换成实际父级地址）：
+
+```html
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>通知设置</title>
+  <link rel="stylesheet" href="./tokens/tokens.css">
+  <link rel="stylesheet" href="./components/base.css">
+  <link rel="stylesheet" href="./components/page-header.css">
+  <link rel="stylesheet" href="./pages/subpage.css">
+</head>
+<body class="ui-subpage">
+  <a class="ui-skip" href="#main">跳到主要内容</a>
+  <header class="ui-sub-header">
+    <a class="ui-sub-header__back" href="./index.html" aria-label="返回设置">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m14 6-6 6 6 6"/></svg>
+    </a>
+    <h1 class="ui-sub-header__title" id="page-title">通知设置</h1>
+  </header>
+  <main class="ui-subpage__content" id="main" tabindex="-1" aria-labelledby="page-title">
+    <p>在这里直接放入字段、列表或正文，不再添加标题。</p>
+  </main>
+</body>
+</html>
+```
+
+包含开关、保存、存储失败反馈与系统主题跟随的[完整通知设置示例](../pages/subpage.html)可以直接运行和复制。它使用确定的父级返回链接，业务操作全部位于正文中。
 
 ---
 
