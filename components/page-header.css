@@ -1,0 +1,79 @@
+/* ============================================================
+   PageHeader — 一级页面大标题
+   ------------------------------------------------------------
+   结构
+   <header class="ui-page-title">
+     <div>
+       <h1 class="ui-page-title__text">发现</h1>
+       <p class="ui-page-title__sub">看看大家在聊什么</p>
+     </div>
+     <div class="ui-page-title__actions">
+       <button class="ui-btn ui-btn--icon">…</button>
+     </div>
+   </header>
+
+   规则
+   - 28px / 700，负字距，行高 1，与副标题留 8px
+   - 右侧操作最多两个图标按钮，多了收进「⋯」
+   ============================================================ */
+
+.ui-page-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: var(--sp-3) 2px var(--sp-5);
+}
+
+.ui-page-title__text {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: var(--fs-large-title);
+  font-weight: var(--fw-heavy);
+  line-height: 1;
+  letter-spacing: var(--ls-tighter);
+  color: var(--text-primary);
+}
+
+.ui-page-title__sub {
+  margin: var(--sp-2) 0 0;
+  font-size: var(--fs-body-small);
+  font-weight: var(--fw-semibold);
+  color: var(--text-secondary);
+}
+
+.ui-page-title__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* —— 分区小标题 —— */
+.ui-section-title {
+  margin: var(--sp-6) 2px var(--sp-3);
+  font-family: var(--font-ui);
+  font-size: var(--fs-title-section);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-tight);
+  color: var(--text-primary);
+}
+
+/* —— 二级页面的紧凑标题（配返回键） —— */
+.ui-sub-header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: calc(var(--sp-3) + var(--safe-top)) var(--page-h) var(--sp-3);
+}
+.ui-sub-header__title {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-ui);
+  font-size: 17px;
+  font-weight: var(--fw-bold);
+  letter-spacing: -.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

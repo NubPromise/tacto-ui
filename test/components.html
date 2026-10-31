@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tacto UI — 组件组合与主题验证</title>
+<script>
+  const params = new URLSearchParams(location.search);
+  document.documentElement.dataset.theme = params.get('theme') === 'dark' ? 'dark' : 'light';
+  document.documentElement.dataset.brand = params.get('brand') === 'plum' ? 'plum' : 'blue';
+</script>
+<link rel="stylesheet" href="../tokens/tokens.css">
+<link rel="stylesheet" href="../components/base.css">
+<link rel="stylesheet" href="../components/button.css">
+<link rel="stylesheet" href="../components/card.css">
+<link rel="stylesheet" href="../components/list.css">
+<link rel="stylesheet" href="../components/field.css">
+<link rel="stylesheet" href="../components/switch.css">
+<link rel="stylesheet" href="../components/select.css">
+<link rel="stylesheet" href="../components/feed.css">
+<link rel="stylesheet" href="../components/badge.css">
+<link rel="stylesheet" href="../components/bubble.css">
+<link rel="stylesheet" href="../components/voice.css">
+<style>
+  /* 第二品牌只覆盖令牌，不覆盖任何组件选择器。 */
+  :root[data-brand='plum'] {
+    --accent: #6d28d9;
+    --accent-deep: #5b21b6;
+    --accent-soft: rgba(109, 40, 217, .09);
+    --action-bg: #6d28d9;
+    --action-bg-hover: #5b21b6;
+  }
+  :root[data-brand='plum'][data-theme='dark'] {
+    --accent: #c4b5fd;
+    --accent-deep: #ddd6fe;
+    --accent-soft: rgba(196, 181, 253, .14);
+  }
+  .test-page { max-width: 640px; margin: auto; padding-bottom: var(--sp-8); }
+  .test-section { margin-top: var(--sec-gap); }
+  .test-controls { flex-wrap: wrap; margin-block: var(--sp-4); }
+  .test-controls .ui-btn { flex: 1 1 auto; }
+  .test-settings { margin-top: var(--sp-4); }
+  .test-settings > .ui-card { overflow: visible; }
+  .test-status { min-height: 1.65em; margin-top: var(--sp-3); }
+  .test-results { margin-block: var(--sp-5); }
+  .test-results pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: var(--fs-body-small); }
+  .test-samples { display: grid; gap: var(--sp-3); }
+  .test-count { position: relative; display: inline-flex; margin-left: var(--sp-2); padding: var(--sp-2); }
+  .test-probes { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+</style>
+</head>
+<body>
+<a class="ui-skip" href="#main">跳到主要内容</a>
+<main class="ui-page test-page" id="main">
+  <a href="../index.html">返回组件总览</a>
+  <h1 class="ui-h1">Tacto UI 组合与主题验证</h1>
+  <p class="ui-small ui-muted">设置表单、列表、开关与内容互动共用原始组件样式；此示例只在当前页面保存设置。</p>
+  <div class="ui-cluster test-controls" role="group" aria-label="预览外观">
+    <button class="ui-btn" type="button" id="brand-toggle">切换为紫色品牌</button>
+    <button class="ui-btn" type="button" id="theme-toggle">切换为深色</button>
+  </div>
+  <p class="ui-small" id="test-summary" role="status">正在验证…</p>
+  <details class="test-results">
+    <summary>查看断言结果</summary>
+    <pre id="out"></pre>
+  </details>
+
+  <section class="test-section" aria-labelledby="settings-title">
+    <h2 class="ui-h2" id="settings-title">偏好设置</h2>
+    <form class="ui-stack test-settings" id="settings-form">
+      <div class="ui-card ui-stack">
+        <label class="ui-field"><span class="ui-field__label">显示名称</span>
+          <input class="ui-field__input" name="display-name" value="林深" autocomplete="nickname" maxlength="40">
+        </label>
+        <label class="ui-switch-row" id="notify-row">
+          <span class="ui-switch-row__copy"><strong id="notify-label">消息通知</strong><small id="notify-hint">接收新的回复与提及</small></span>
+          <span class="ui-switch"><input type="checkbox" role="switch" aria-labelledby="notify-label" aria-describedby="notify-hint" checked><span class="ui-switch__track" aria-hidden="true"></span></span>
+        </label>
+        <div class="ui-stack">
+          <span class="ui-field__label" id="frequency-label">同步频率</span>
+          <div class="ui-select" id="frequency">
+            <button class="ui-select__trigger" type="button" aria-labelledby="frequency-label"><span>实时同步</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+            <div class="ui-select__menu" hidden>
+              <button class="ui-select__option" data-value="live" aria-selected="true"><span>实时同步</span></button>
+              <button class="ui-select__option" data-value="daily"><span>每天一次</span></button>
+              <button class="ui-select__option" data-value="manual"><span>手动同步</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <ul class="ui-list">
+        <li><a class="ui-row" href="#content-title"><span class="ui-row__copy"><strong>内容互动示例</strong><small>检查列表与布局工具是否互相影响</small></span><span class="ui-row__arrow" aria-hidden="true">›</span></a></li>
+      </ul>
+      <div class="ui-cluster ui-cluster--between" id="layout-cluster">
+        <span class="ui-meta ui-faint">修改后可在此页预览</span>
+        <button class="ui-btn ui-btn--primary" id="save" type="submit">保存设置</button>
+      </div>
+    </form>
+    <p class="test-status ui-small" id="save-status" role="status"></p>
+  </section>
+
+  <section class="test-section test-samples" aria-labelledby="content-title">
+    <h2 class="ui-h2" id="content-title">内容互动</h2>
+    <article class="ui-post">
+      <header class="ui-post__head"><div class="ui-post__author"><strong>林深</strong><span>刚刚发布</span></div><button class="ui-post__more" type="button" aria-label="更多操作">⋯</button></header>
+      <h3 class="ui-post__title">给日常留一点空白</h3>
+      <p class="ui-post__body">一条包含较长文本的动态，用来检查窄屏换行、正文层级和按钮的实际点击范围。</p>
+      <footer class="ui-post__meta">
+        <button type="button" aria-label="点赞" aria-pressed="false" data-like><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l8.8 8.8 8.8-8.8a5.5 5.5 0 0 0 0-7.8z"/></svg><span data-count>28</span></button>
+        <button type="button" aria-label="收藏" aria-pressed="false" data-save>收藏</button>
+      </footer>
+    </article>
+    <div class="ui-comment"><p class="ui-comment__text">评论操作也应当保留足够的点击区域。</p><div class="ui-comment__ops"><time>2 分钟前</time><button type="button" aria-label="赞这条评论" aria-pressed="false" data-like>赞</button></div></div>
+    <div class="ui-bubble ui-bubble--out"><div class="ui-bubble__content"><p class="ui-bubble__text">不同主题下，消息内容仍然清晰。</p></div></div>
+    <div><span class="ui-badge ui-badge--success">已同步</span> <span class="ui-badge ui-badge--error">同步失败</span> <span class="test-count">通知<span class="ui-badge-count">3</span></span></div>
+    <button class="ui-voice ui-voice--mine" type="button" aria-label="语音样式示例，4 秒"><span class="ui-voice__duration">4 秒</span></button>
+  </section>
+  <div class="test-probes" aria-hidden="true"><span id="hover-color" style="background:var(--action-bg-hover);color:var(--text-on-accent)">主按钮悬停</span></div>
+</main>
+<script type="module">
+import { createSelect } from '../behaviors/index.js';
+
+const html = document.documentElement;
+const initial = { theme: html.dataset.theme, brand: html.dataset.brand };
+const results = [];
+const check = (name, fn) => {
+  try { if (!fn()) throw new Error('条件未满足'); results.push(`PASS ${name}`); }
+  catch (error) { results.push(`FAIL ${name} → ${error.message}`); }
+};
+const $ = (selector) => document.querySelector(selector);
+const select = createSelect($('#frequency'));
+const channels = (color) => {
+  const values = color.match(/[\d.]+/g).map(Number);
+  return [...values.slice(0, 3), values[3] ?? 1];
+};
+const blend = (fg, bg) => fg.slice(0, 3).map((n, i) => n * fg[3] + bg[i] * (1 - fg[3]));
+const luminance = (rgb) => rgb.map((n) => n / 255).map((n) => n <= .04045 ? n / 12.92 : ((n + .055) / 1.055) ** 2.4)
+  .reduce((sum, n, i) => sum + n * [.2126, .7152, .0722][i], 0);
+const ratio = (fg, bg) => {
+  const a = luminance(blend(channels(fg), bg));
+  const b = luminance(bg);
+  return (Math.max(a, b) + .05) / (Math.min(a, b) + .05);
+};
+const textContrast = (el) => {
+  const style = getComputedStyle(el);
+  const ancestors = [];
+  for (let current = el; current; current = current.parentElement) ancestors.unshift(current);
+  const background = ancestors.reduce((base, current) => blend(channels(getComputedStyle(current).backgroundColor), base), [255, 255, 255]);
+  return ratio(style.color, background);
+};
+for (const brand of ['blue', 'plum']) {
+  html.dataset.brand = brand;
+  for (const theme of ['light', 'dark']) {
+    html.dataset.theme = theme;
+    for (const [label, selector] of [
+      ['主按钮', '#save'], ['主按钮悬停填充', '#hover-color'], ['发出消息', '.ui-bubble__text'],
+      ['成功徽标', '.ui-badge--success'], ['错误徽标', '.ui-badge--error'],
+      ['计数徽标', '.ui-badge-count'], ['三级文字', '.ui-faint'], ['语音时长', '.ui-voice__duration'],
+    ]) {
+      const el = $(selector);
+      check(`${brand}/${theme} ${label}对比度 ≥ 4.5:1`, () => {
+        const value = textContrast(el);
+        if (value < 4.5) throw new Error(`${value.toFixed(2)}:1`);
+        return true;
+      });
+    }
+  }
+}
+html.dataset.theme = initial.theme;
+html.dataset.brand = initial.brand;
+
+check('加载列表样式后，布局工具仍无额外 padding 与最小高度', () => {
+  const style = getComputedStyle($('#layout-cluster'));
+  return style.display === 'flex' && parseFloat(style.paddingTop) === 0 && parseFloat(style.paddingLeft) === 0
+    && (style.minHeight === 'auto' || parseFloat(style.minHeight) === 0);
+});
+for (const selector of ['.ui-switch input', '.ui-post__more', '.ui-post__meta button', '.ui-comment__ops button']) {
+  check(`${selector} 点击范围 ≥ 48×48px`, () => [...document.querySelectorAll(selector)].every((el) => {
+    const rect = el.getBoundingClientRect();
+    return rect.width >= 48 && rect.height >= 48;
+  }));
+}
+check('开关通过可见文字命名并关联说明', () => {
+  const el = $('.ui-switch input');
+  return document.getElementById(el.getAttribute('aria-labelledby'))?.textContent === '消息通知'
+    && document.getElementById(el.getAttribute('aria-describedby'))?.textContent.includes('新的回复');
+});
+check('点击开关行文字也会切换', () => {
+  const el = $('.ui-switch input');
+  const before = el.checked;
+  $('#notify-label').click();
+  const toggled = el.checked !== before;
+  el.checked = before;
+  return toggled;
+});
+check('下拉展开不会提交设置表单', () => {
+  let submitted = false;
+  const onSubmit = (e) => { e.preventDefault(); submitted = true; };
+  const form = $('#settings-form');
+  form.addEventListener('submit', onSubmit);
+  $('.ui-select__trigger').click();
+  const opened = select.isOpen;
+  select.close();
+  form.removeEventListener('submit', onSubmit);
+  return opened && !submitted;
+});
+
+$('#out').textContent = results.join('\n');
+const failed = results.filter((r) => r.startsWith('FAIL')).length;
+$('#test-summary').textContent = `${results.length - failed}/${results.length} 项通过${failed ? `，${failed} 项失败` : '，可切换主题继续预览'}`;
+document.title = failed ? 'FAILED' : 'ALL_PASS';
+const updateControls = () => {
+  $('#brand-toggle').textContent = html.dataset.brand === 'plum' ? '切换为蓝色品牌' : '切换为紫色品牌';
+  $('#theme-toggle').textContent = html.dataset.theme === 'dark' ? '切换为浅色' : '切换为深色';
+};
+$('#brand-toggle').addEventListener('click', () => { html.dataset.brand = html.dataset.brand === 'plum' ? 'blue' : 'plum'; updateControls(); });
+$('#theme-toggle').addEventListener('click', () => { html.dataset.theme = html.dataset.theme === 'dark' ? 'light' : 'dark'; updateControls(); });
+$('#settings-form').addEventListener('submit', (event) => { event.preventDefault(); $('#save-status').textContent = '设置已保存到本次页面预览'; });
+document.querySelectorAll('[data-like], [data-save]').forEach((button) => button.addEventListener('click', () => {
+  const pressed = button.getAttribute('aria-pressed') !== 'true';
+  button.setAttribute('aria-pressed', String(pressed));
+  button.classList.toggle(button.hasAttribute('data-like') ? 'is-liked' : 'is-saved', pressed);
+  const count = button.querySelector('[data-count]');
+  if (count) count.textContent = pressed ? '29' : '28';
+}));
+updateControls();
+</script>
+</body>
+</html>

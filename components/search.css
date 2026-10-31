@@ -1,0 +1,118 @@
+/* ============================================================
+   Search — 搜索框与结果
+   ------------------------------------------------------------
+   结构
+   <div class="ui-search">
+     <label class="ui-search__box">
+       <svg …>
+       <input type="search" placeholder="搜索">
+     </label>
+     <button class="ui-search__cancel">取消</button>
+   </div>
+
+   规则
+   - 输入框 44px 高，胶囊形，聚焦时边框高亮
+   - 「取消」只在聚焦或有关键词时出现
+   - 命中关键词用 <mark class="ui-hl">，浅强调底，不用黄色
+   ============================================================ */
+
+.ui-search {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 0 var(--page-h) var(--sp-3);
+}
+
+.ui-search__box {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex: 1;
+  min-width: 0;
+  padding: 11px var(--sp-4);
+  border: 1px solid transparent;
+  border-radius: var(--r-pill);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-card);
+  color: var(--text-secondary);
+  transition: border-color var(--dur-fast) var(--ease);
+}
+
+.ui-search__box:focus-within { border-color: var(--accent); }
+.ui-search__box > svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+.ui-search__box input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  outline: none;
+  font-size: 16px;
+  color: var(--text-primary);
+}
+.ui-search__box input::placeholder { color: var(--text-tertiary); }
+.ui-search__box input::-webkit-search-cancel-button { display: none; }
+
+.ui-search__cancel {
+  flex-shrink: 0;
+  padding: var(--sp-2);
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-semibold);
+}
+
+/* —— 关键词高亮 —— */
+mark.ui-hl {
+  padding: 0 1px;
+  border-radius: 3px;
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+}
+
+/* —— 结果行：标题 + 两行摘要 + 元信息 —— */
+.ui-result {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  width: 100%;
+  min-height: 68px;
+  padding: 13px var(--card-pad);
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  background: none;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  transition: background-color var(--dur-fast) var(--ease);
+}
+.ui-result:last-child { border-bottom: 0; }
+.ui-result:active { background: var(--bg-card-soft); }
+
+.ui-result__main { flex: 1; min-width: 0; }
+
+.ui-result__title {
+  font-size: 14.5px;
+  font-weight: var(--fw-bold);
+  color: var(--text-primary);
+}
+
+.ui-result__snippet {
+  margin-top: 3px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ui-result__meta {
+  display: flex;
+  gap: 10px;
+  margin-top: var(--sp-1);
+  font-size: 11px;
+  color: var(--text-tertiary);
+}

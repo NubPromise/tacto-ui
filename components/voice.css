@@ -1,0 +1,105 @@
+/* ============================================================
+   Voice — 语音条
+   ------------------------------------------------------------
+   结构
+   <button class="ui-voice" aria-label="播放语音，3 秒">
+     <span class="ui-voice__play">▶</span>
+     <span class="ui-voice__wave"><i></i><i></i><i></i><i></i></span>
+     <span class="ui-voice__duration">3"</span>
+   </button>
+
+   变体：默认（对方）/ --mine（自己，反色）
+   状态：.is-playing（波形跳动）/ .is-error（播放失败）
+
+   规则
+   - 整条可点，最小高度 48px
+   - 波形条数与时长相关（每 2 秒一根，3–5 根）
+   - 播放中波形用透明度呼吸，不用位移（避免抖动）
+   ============================================================ */
+
+.ui-voice {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: var(--touch);
+  padding: var(--sp-2) var(--sp-4);
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-soft);
+  color: var(--text-primary);
+  font-size: var(--fs-body-small);
+  transition: transform var(--dur-fast) var(--ease-spring);
+}
+
+.ui-voice:active { transform: scale(.97); }
+
+.ui-voice__play {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--action-bg);
+  color: var(--text-on-accent);
+}
+.ui-voice__play svg { width: 12px; height: 12px; }
+
+.ui-voice__wave {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  height: 18px;
+}
+
+.ui-voice__wave i {
+  display: block;
+  width: 3px;
+  border-radius: var(--r-pill);
+  background: var(--text-tertiary);
+  height: 40%;
+}
+.ui-voice__wave i:nth-child(2) { height: 75%; }
+.ui-voice__wave i:nth-child(3) { height: 100%; }
+.ui-voice__wave i:nth-child(4) { height: 65%; }
+.ui-voice__wave i:nth-child(5) { height: 45%; }
+
+.ui-voice__duration {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: var(--fw-semibold);
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* —— 播放中：波形呼吸 —— */
+.ui-voice.is-playing .ui-voice__wave i {
+  animation: ui-voice-wave 1s var(--ease) infinite;
+}
+.ui-voice.is-playing .ui-voice__wave i:nth-child(2) { animation-delay: .1s; }
+.ui-voice.is-playing .ui-voice__wave i:nth-child(3) { animation-delay: .2s; }
+.ui-voice.is-playing .ui-voice__wave i:nth-child(4) { animation-delay: .3s; }
+.ui-voice.is-playing .ui-voice__wave i:nth-child(5) { animation-delay: .4s; }
+
+@keyframes ui-voice-wave {
+  0%, 100% { opacity: .3; }
+  50% { opacity: 1; }
+}
+
+/* —— 自己的语音：反色 —— */
+.ui-voice--mine {
+  background: var(--action-bg);
+  color: var(--text-on-accent);
+  box-shadow: none;
+}
+.ui-voice--mine .ui-voice__play {
+  background: rgba(255, 255, 255, .22);
+  color: var(--text-on-accent);
+}
+.ui-voice--mine .ui-voice__wave i { background: rgba(255, 255, 255, .9); }
+.ui-voice--mine .ui-voice__duration { color: var(--text-on-accent); }
+
+/* —— 播放失败 —— */
+.ui-voice.is-error .ui-voice__play { background: var(--error-fill); }
+.ui-voice.is-error .ui-voice__duration { color: var(--error); }

@@ -1,0 +1,66 @@
+/* ============================================================
+   AppGrid — 应用宫格
+   ------------------------------------------------------------
+   结构
+   <div class="ui-app-grid">
+     <a class="ui-app-item" href="…">
+       <span class="ui-app-item__icon">…</span>
+       <span class="ui-app-item__label">日历</span>
+     </a>
+   </div>
+
+   规则
+   - 固定 4 列，图标 46px 圆角 15px
+   - 标签最多 4 个字，超出换行而不省略
+   - 整格可点，按压缩放 0.93
+   ============================================================ */
+
+.ui-app-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.ui-app-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 14px 4px 12px;
+  border-radius: var(--r-lg);
+  min-height: var(--touch);
+  color: inherit;
+  text-decoration: none;
+  transition: transform var(--dur-fast) var(--ease-spring),
+              background-color var(--dur-fast) var(--ease);
+}
+
+.ui-app-item:active {
+  transform: scale(.93);
+  background: rgba(var(--ink-rgb) / .05);
+}
+
+.ui-app-item__icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 15px;
+  background: var(--bg-card);
+  color: var(--accent);
+  box-shadow: var(--shadow-card);
+}
+.ui-app-item__icon svg { width: 24px; height: 24px; }
+
+.ui-app-item__label {
+  font-size: 11.5px;
+  font-weight: var(--fw-semibold);
+  line-height: 1.3;
+  text-align: center;
+  color: var(--text-primary);
+}
+
+/* —— 紧凑版：图标 40px，用于更多入口 —— */
+.ui-app-grid--sm .ui-app-item { padding: 10px 2px; gap: 6px; }
+.ui-app-grid--sm .ui-app-item__icon { width: 40px; height: 40px; border-radius: 13px; }
+.ui-app-grid--sm .ui-app-item__label { font-size: 11px; }

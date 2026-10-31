@@ -1,0 +1,83 @@
+/* ============================================================
+   Dialog — 对话框
+   ------------------------------------------------------------
+   基于原生 <dialog>，自带焦点陷阱、Esc 关闭与 ::backdrop。
+
+   结构
+   <dialog class="ui-dialog" id="d" aria-labelledby="d-title">
+     <h2 class="ui-dialog__title" id="d-title">标题</h2>
+     <p class="ui-dialog__body">正文</p>
+     <div class="ui-dialog__actions">
+       <button class="ui-btn">取消</button>
+       <button class="ui-btn ui-btn--primary">确定</button>
+     </div>
+   </dialog>
+
+   规则
+   - 打开用 showModal()，不要手写遮罩层
+   - 危险操作把主按钮换成 --danger，且默认焦点放在「取消」上
+   - 按钮右对齐，主操作在最右
+   ============================================================ */
+
+.ui-dialog {
+  width: min(calc(100vw - 32px), 420px);
+  max-height: calc(100dvh - 48px);
+  padding: var(--sp-6);
+  border: 0;
+  border-radius: var(--r-2xl);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  box-shadow: 0 24px 80px rgba(18, 26, 40, .22);
+  overflow: auto;
+}
+
+.ui-dialog::backdrop {
+  background: rgba(14, 17, 22, .42);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+}
+
+/* —— 入场动效 —— */
+.ui-dialog[open] {
+  animation: ui-dialog-in var(--dur-normal) var(--ease-out);
+}
+@keyframes ui-dialog-in {
+  from { opacity: 0; transform: translateY(12px) scale(.97); }
+  to { opacity: 1; transform: none; }
+}
+
+.ui-dialog__title {
+  font-family: var(--font-ui);
+  font-size: var(--fs-title-section);
+  font-weight: var(--fw-bold);
+  line-height: 1.4;
+  letter-spacing: var(--ls-tight);
+}
+
+.ui-dialog__body {
+  margin-top: var(--sp-2);
+  font-size: var(--fs-body-small);
+  line-height: 1.65;
+  color: var(--text-secondary);
+}
+
+.ui-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--sp-2);
+  margin-top: var(--sp-5);
+}
+.ui-dialog__actions .ui-btn { min-width: 88px; }
+
+/* —— 堆叠式操作（选项多于两个时用这个） —— */
+.ui-dialog__actions--stack {
+  flex-direction: column-reverse;
+}
+.ui-dialog__actions--stack .ui-btn { width: 100%; }
+
+/* —— 表单型对话框 —— */
+.ui-dialog__form {
+  display: grid;
+  gap: var(--sp-4);
+  margin-top: var(--sp-5);
+}

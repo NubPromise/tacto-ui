@@ -1,0 +1,139 @@
+/* ============================================================
+   List — 列表与导航行
+   ------------------------------------------------------------
+   结构
+   <ul class="ui-list">
+     <li><a class="ui-row" href="…">
+       <span class="ui-row__mark">…</span>
+       <span class="ui-row__copy">
+         <strong>主文案</strong>
+         <small>辅助说明</small>
+       </span>
+       <span class="ui-row__value">值</span>
+       <span class="ui-row__arrow">…</span>
+     </a></li>
+   </ul>
+
+   规则
+   - 行高 ≥ 48px，整行可点，不要只让文字可点
+   - 分隔线用 --border，首行不加、末行不加
+   - 箭头只在真的会跳转时出现
+   ============================================================ */
+
+.ui-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-radius: var(--r-lg);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.ui-list--plain {
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.ui-list > li + li { border-top: 1px solid var(--border); }
+
+.ui-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  width: 100%;
+  min-height: var(--touch);
+  padding: var(--sp-3) var(--card-pad);
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  text-decoration: none;
+  font-size: var(--fs-body);
+  transition: background-color var(--dur-fast) var(--ease);
+}
+
+.ui-row:hover { background: var(--accent-soft); text-decoration: none; }
+.ui-row:active { background: var(--accent-soft); }
+
+/* —— 行首标记：图标 / 头像 / 序号 —— */
+.ui-row__mark {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-sm);
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+}
+.ui-row__mark svg { width: 20px; height: 20px; }
+
+/* —— 行主体 —— */
+.ui-row__copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+.ui-row__copy strong {
+  font-weight: var(--fw-medium);
+  font-size: var(--fs-body);
+  line-height: 1.4;
+  color: var(--text-primary);
+}
+.ui-row__copy small {
+  font-size: var(--fs-meta);
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
+/* —— 行尾值与箭头 —— */
+.ui-row__value {
+  flex-shrink: 0;
+  font-size: var(--fs-body-small);
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.ui-row__arrow {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  color: var(--text-tertiary);
+}
+
+/* —— 危险行 —— */
+.ui-row--danger .ui-row__copy strong,
+.ui-row--danger .ui-row__value { color: var(--error); }
+.ui-row--danger .ui-row__mark { background: var(--error-soft); color: var(--error); }
+
+/* —— 分组标题 —— */
+.ui-list-label {
+  padding: var(--sp-4) var(--card-pad) var(--sp-2);
+  font-family: var(--font-ui);
+  font-size: var(--fs-meta);
+  font-weight: var(--fw-semibold);
+  letter-spacing: .02em;
+  color: var(--text-tertiary);
+}
+
+/* —— 键值对行（详情页） —— */
+.ui-kv { margin: 0; }
+.ui-kv > div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-5);
+  padding: var(--sp-3) 0;
+  border-bottom: 1px solid var(--border);
+  font-size: var(--fs-body-small);
+}
+.ui-kv > div:last-child { border-bottom: 0; }
+.ui-kv dt { color: var(--text-secondary); flex-shrink: 0; }
+.ui-kv dd {
+  margin: 0;
+  text-align: right;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}

@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><title>Tacto UI — 行为测试</title></head>
+<body>
+<button id="opener">触发</button>
+<dialog id="dlg"><button data-close>关闭</button></dialog>
+<div id="backdrop" hidden></div>
+<div id="sheet" hidden><div class="ui-sheet__grabber"></div><button data-close-sheet>取消</button></div>
+<div id="region"></div>
+<div class="ui-seg" role="tablist">
+  <button role="tab" aria-selected="true">A</button>
+  <button role="tab" aria-selected="false">B</button>
+  <button role="tab" aria-selected="false">C</button>
+</div>
+<div class="ui-select" id="sel">
+  <button class="ui-select__trigger" aria-expanded="false"><span>标准版</span><svg></svg></button>
+  <div class="ui-select__menu" hidden>
+    <button class="ui-select__option" aria-selected="true" data-value="standard"><span>标准版</span><svg></svg></button>
+    <button class="ui-select__option" aria-selected="false" data-value="pro"><span>专业版</span><svg></svg></button>
+    <button class="ui-select__option" aria-selected="false" data-value="team"><span>团队版</span><svg></svg></button>
+  </div>
+</div>
+<div class="ui-refresh" id="refresh" data-state="idle"><span class="ui-refresh__indicator"></span><span class="ui-refresh__text">下拉刷新</span></div>
+<pre id="out"></pre>
+<script type="module">
+import { createDialog, createSheet, createToaster, createSegmented, createSelect, createPullRefresh, lockScroll } from '../behaviors/index.js';
+
+const results = [];
+const check = (name, fn) => {
+  try {
+    const value = fn();
+    results.push(`${value === true || value === undefined ? 'PASS' : 'FAIL'} ${name}${value === true || value === undefined ? '' : ' → ' + JSON.stringify(value)}`);
+  } catch (error) {
+    results.push(`FAIL ${name} → 抛错 ${error.message}`);
+  }
+};
+
+// —— 对话框 ——
+const dlgEl = document.getElementById('dlg');
+const opener = document.getElementById('opener');
+const dialog = createDialog(dlgEl);
+
+check('createDialog 传入非 dialog 元素会抛 TypeError', () => {
+  try { createDialog(document.body); return 'should-throw'; } catch (e) { return e instanceof TypeError; }
+});
+
+check('open() 后 dialog.open 为 true', () => { dialog.open(opener); return dlgEl.open === true; });
+check('重复 open() 不会抛错', () => { dialog.open(opener); dialog.open(opener); return dlgEl.open === true; });
+check('[data-close] 按钮可关闭', () => { dlgEl.querySelector('[data-close]').click(); return dlgEl.open === false; });
+
+// close 事件是异步派发的，焦点归还要等一拍
+await new Promise((resolve) => setTimeout(resolve, 60));
+check('关闭后焦点归还给触发元素', () => document.activeElement === opener);
+
+// —— 底部面板 ——
+const sheetEl = document.getElementById('sheet');
+const backdrop = document.getElementById('backdrop');
+const sheet = createSheet(sheetEl, { backdrop });
+
+check('面板打开后 hidden 为 false', () => { sheet.open(); return sheetEl.hidden === false && backdrop.hidden === false; });
+check('面板打开时锁定页面滚动', () => document.documentElement.style.overflow === 'hidden');
+check('点遮罩可关闭', () => { backdrop.click(); return sheetEl.hidden === true; });
+check('关闭后释放滚动', () => document.documentElement.style.overflow === '');
+
+check('滚动锁定支持嵌套引用计数', () => {
+  const a = lockScroll();
+  const b = lockScroll();
+  a();
+  const stillLocked = document.documentElement.style.overflow === 'hidden';
+  b();
+  const released = document.documentElement.style.overflow === '';
+  return stillLocked && released;
+});
+
+// —— 轻提示 ——
+const region = document.getElementById('region');
+const toast = createToaster(region, { duration: 0 });
+
+check('普通提示用 role="status"', () => {
+  const el = toast.show('已保存', { type: 'success' });
+  return el.getAttribute('role') === 'status' && region.children.length === 1;
+});
+
+check('错误提示用 role="alert"', () => {
+  const el = toast.show('失败', { type: 'error' });
+  return el.getAttribute('role') === 'alert';
+});
+
+check('新提示替换旧提示，不排队', () => {
+  toast.show('一'); toast.show('二');
+  return region.querySelectorAll('.ui-toast').length === 1
+    && region.querySelector('.ui-toast__text').textContent === '二';
+});
+
+check('文案按纯文本插入，不解析 HTML', () => {
+  const el = toast.show('<b>粗体</b>');
+  return el.querySelector('b') === null
+    && el.querySelector('.ui-toast__text').textContent === '<b>粗体</b>';
+});
+
+// —— 分段控件 ——
+const segEl = document.querySelector('.ui-seg');
+const seg = createSegmented(segEl);
+const items = [...segEl.querySelectorAll('[role="tab"]')];
+
+check('初始选中第一项', () => items[0].getAttribute('aria-selected') === 'true');
+check('点击切换选中', () => { items[2].click(); return seg.index === 2 && items[2].getAttribute('aria-selected') === 'true'; });
+check('roving tabindex：只有选中项可 Tab 停靠', () => items[2].tabIndex === 0 && items[0].tabIndex === -1);
+check('方向键可切换', () => {
+  items[2].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
+  return seg.index === 1;
+});
+check('方向键到头会循环', () => {
+  seg.select(0);
+  items[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
+  return seg.index === 2;
+});
+
+
+// —— 下拉选择 ——
+const selRoot = document.getElementById('sel');
+const selectChanges = [];
+const select = createSelect(selRoot, { onChange: (value) => selectChanges.push(value) });
+const trigger = selRoot.querySelector('.ui-select__trigger');
+const opts = [...selRoot.querySelectorAll('.ui-select__option')];
+
+check('初始值取自 aria-selected', () => select.value === 'standard');
+check('初始化不发送变更回调', () => selectChanges.length === 0);
+check('combobox 关联真实 listbox', () => trigger.getAttribute('role') === 'combobox'
+  && document.getElementById(trigger.getAttribute('aria-controls')) === selRoot.querySelector('[role="listbox"]'));
+check('选项不会额外进入 Tab 顺序或提交表单', () => opts.every((o) => o.tabIndex === -1 && o.type === 'button'));
+check('点击触发器展开菜单', () => { trigger.click(); return select.isOpen && !selRoot.querySelector('.ui-select__menu').hidden; });
+check('展开时 aria-expanded 为 true', () => trigger.getAttribute('aria-expanded') === 'true');
+check('方向键移动活动项', () => {
+  trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+  return trigger.getAttribute('aria-activedescendant') === opts[1].id;
+});
+check('浏览活动项不会改变值、标签或提交态', () => select.value === 'standard'
+  && trigger.querySelector('span').textContent === '标准版'
+  && opts[0].getAttribute('aria-selected') === 'true' && selectChanges.length === 0);
+check('Enter 选中并更新标签', () => {
+  trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+  return select.value === 'pro' && trigger.querySelector('span').textContent === '专业版' && !select.isOpen;
+});
+check('Esc 关闭菜单', () => {
+  trigger.click();
+  trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+  trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+  return !select.isOpen;
+});
+check('Esc 取消浏览，保留已提交的值与标签', () => select.value === 'pro'
+  && trigger.querySelector('span').textContent === '专业版'
+  && opts[1].getAttribute('aria-selected') === 'true' && selectChanges.length === 1);
+check('重开从已提交项开始', () => {
+  select.open();
+  return trigger.getAttribute('aria-activedescendant') === opts[1].id;
+});
+check('Tab 关闭也不会提交浏览值', () => {
+  trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+  trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+  return !select.isOpen && select.value === 'pro' && selectChanges.length === 1;
+});
+check('点外部关闭不提交浏览值', () => {
+  select.open();
+  trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+  opener.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+  return !select.isOpen && select.value === 'pro' && selectChanges.length === 1;
+});
+check('setValue 同步值、标签，重复设置不重复通知', () => {
+  select.setValue('team');
+  select.setValue('team');
+  select.setValue('unknown');
+  return select.value === 'team' && trigger.querySelector('span').textContent === '团队版' && selectChanges.length === 2;
+});
+check('键盘跳过禁用选项', () => {
+  select.setValue('standard');
+  opts[1].setAttribute('aria-disabled', 'true');
+  select.open();
+  trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+  const skipped = trigger.getAttribute('aria-activedescendant') === opts[2].id;
+  trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+  return skipped && select.value === 'team';
+});
+check('禁用选项不能通过 setValue 选中', () => { select.setValue('pro'); return select.value === 'team'; });
+check('无 id 多实例的 ARIA 标识不冲突，指定初始值不通知', () => {
+  const clone = selRoot.cloneNode(true);
+  clone.removeAttribute('id');
+  clone.querySelectorAll('[id]').forEach((el) => el.removeAttribute('id'));
+  document.body.append(clone);
+  let called = 0;
+  const second = createSelect(clone, { value: 'standard', onChange: () => called++ });
+  const ids = [...document.querySelectorAll('[id]')].map((el) => el.id);
+  const valid = new Set(ids).size === ids.length && second.value === 'standard' && called === 0;
+  second.destroy();
+  clone.remove();
+  return valid;
+});
+check('destroy 关闭菜单并解绑触发器', () => {
+  select.open();
+  select.destroy();
+  trigger.click();
+  return !select.isOpen && selRoot.querySelector('.ui-select__menu').hidden
+    && trigger.getAttribute('aria-expanded') === 'false' && !trigger.hasAttribute('aria-activedescendant');
+});
+
+// —— 下拉刷新 ——
+const refresh = createPullRefresh({
+  scroller: document.createElement('div'),
+  indicator: document.getElementById('refresh'),
+  onRefresh: async () => {},
+});
+check('下拉刷新初始为 idle', () => document.getElementById('refresh').dataset.state === 'idle');
+check('下拉刷新返回 destroy', () => typeof refresh.destroy === 'function');
+
+document.getElementById('out').textContent = results.join('\n');
+document.title = results.some((r) => r.startsWith('FAIL')) ? 'FAILED' : 'ALL_PASS';
+</script>
+</body>
+</html>

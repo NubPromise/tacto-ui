@@ -1,0 +1,130 @@
+/* ============================================================
+   Button — 按钮
+   ------------------------------------------------------------
+   变体：默认（次级）/ --primary / --ghost / --danger
+   尺寸：默认 / --sm / --lg / --block
+   状态：:hover / :active / :disabled / .is-loading / [aria-pressed]
+
+   规则
+   - 最小高度 48px（触控目标），--sm 为 40px 仅用于密集区域
+   - 一屏内只允许一个 --primary
+   - 按压用 scale 而非变色，保持颜色语义稳定
+   ============================================================ */
+
+.ui-btn {
+  --btn-bg: var(--bg-card);
+  --btn-ink: var(--accent-deep);
+  --btn-border: var(--border);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  min-height: var(--touch);
+  padding: var(--btn-py) var(--btn-px);
+  border: 1px solid var(--btn-border);
+  border-radius: var(--r-md);
+  background: var(--btn-bg);
+  color: var(--btn-ink);
+  font-family: var(--font-ui);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-medium);
+  line-height: 1.3;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background-color var(--dur-fast) var(--ease),
+              border-color var(--dur-fast) var(--ease),
+              transform var(--dur-fast) var(--ease);
+}
+
+.ui-btn:hover { background: var(--accent-soft); border-color: var(--accent); text-decoration: none; }
+.ui-btn:active { transform: scale(var(--scale-press)); }
+
+.ui-btn:disabled,
+.ui-btn[aria-disabled='true'] {
+  opacity: .45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* —— 主按钮 —— */
+.ui-btn--primary {
+  --btn-bg: var(--action-bg);
+  --btn-ink: var(--text-on-accent);
+  --btn-border: var(--action-bg);
+}
+.ui-btn--primary:hover { background: var(--action-bg-hover); border-color: var(--action-bg-hover); }
+
+/* —— 幽灵按钮：无底色，用于次要操作 —— */
+.ui-btn--ghost {
+  --btn-bg: transparent;
+  --btn-ink: var(--text-secondary);
+  --btn-border: transparent;
+}
+.ui-btn--ghost:hover { background: var(--accent-soft); color: var(--accent-deep); border-color: transparent; }
+
+/* —— 危险操作 —— */
+.ui-btn--danger {
+  --btn-bg: transparent;
+  --btn-ink: var(--error);
+  --btn-border: var(--error);
+}
+.ui-btn--danger:hover { background: var(--error-soft); }
+
+/* —— 尺寸 —— */
+.ui-btn--sm {
+  min-height: 40px;
+  padding: var(--sp-2) var(--sp-4);
+  font-size: var(--fs-body-small);
+  border-radius: var(--r-sm);
+}
+.ui-btn--lg {
+  min-height: 52px;
+  padding: var(--sp-4) var(--sp-6);
+  font-size: var(--fs-card-title);
+}
+.ui-btn--block { display: flex; width: 100%; }
+
+/* —— 图标按钮：正方形，必须有 aria-label —— */
+.ui-btn--icon {
+  width: var(--touch);
+  min-height: var(--touch);
+  padding: 0;
+  border-radius: var(--r-pill);
+}
+.ui-btn--icon.ui-btn--sm { width: 40px; min-height: 40px; }
+
+/* —— 加载态：文字保留宽度，用旋转环替代图标 —— */
+.ui-btn.is-loading {
+  color: transparent;
+  pointer-events: none;
+  position: relative;
+}
+.ui-btn.is-loading::after {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  color: var(--btn-ink);
+  animation: ui-btn-spin .7s linear infinite;
+}
+.ui-btn--primary.is-loading::after { color: var(--text-on-accent); }
+
+@keyframes ui-btn-spin { to { transform: rotate(360deg); } }
+
+/* —— 分段选择组：两个以上按钮贴合 —— */
+.ui-btn-group { display: inline-flex; }
+.ui-btn-group .ui-btn { border-radius: 0; }
+.ui-btn-group .ui-btn:first-child { border-radius: var(--r-md) 0 0 var(--r-md); }
+.ui-btn-group .ui-btn:last-child { border-radius: 0 var(--r-md) var(--r-md) 0; }
+.ui-btn-group .ui-btn + .ui-btn { margin-left: -1px; }
+
+/* —— 选中态（用于筛选标签） —— */
+.ui-btn[aria-pressed='true'] {
+  --btn-bg: var(--accent-soft);
+  --btn-ink: var(--accent-deep);
+  --btn-border: var(--accent);
+}

@@ -1,0 +1,125 @@
+/* ============================================================
+   Sheet — 底部面板 / 操作表
+   ------------------------------------------------------------
+   结构
+   <div class="ui-sheet" role="dialog" aria-modal="true" aria-labelledby="s-title">
+     <div class="ui-sheet__grabber" aria-hidden="true"></div>
+     <h2 class="ui-sheet__title" id="s-title">标题</h2>
+     <div class="ui-sheet__body">…</div>
+   </div>
+   <div class="ui-sheet-backdrop" data-close></div>
+
+   规则
+   - 顶角 28px，底部贴安全区
+   - 内容超过 85dvh 时内部滚动，面板本身不滚
+   - 必须能通过点遮罩、按 Esc、下滑把手三种方式关闭
+   ============================================================ */
+
+.ui-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  background: rgba(14, 17, 22, .42);
+  animation: ui-fade-in var(--dur-normal) var(--ease-out);
+}
+.ui-sheet-backdrop[hidden] { display: none; }
+
+@keyframes ui-fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+.ui-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: calc(var(--z-overlay) + 1);
+  display: flex;
+  flex-direction: column;
+  max-height: 85dvh;
+  padding: var(--sp-2) var(--page-h);
+  padding-bottom: calc(var(--sp-5) + var(--safe-bottom));
+  border-radius: var(--r-2xl) var(--r-2xl) 0 0;
+  background: var(--glass-surface-bg);
+  box-shadow: var(--glass-surface-shadow);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  animation: ui-sheet-in var(--dur-slow) var(--ease-out);
+  /* 拖拽回弹用 transform 过渡；拖动过程中由 .is-dragging 关掉 */
+  transition: transform var(--dur-normal) var(--ease-out);
+}
+
+.ui-sheet.is-dragging { transition: none; }
+
+.ui-sheet[hidden] { display: none; }
+
+@keyframes ui-sheet-in {
+  from { transform: translateY(100%); }
+  to { transform: none; }
+}
+
+/* —— 顶部把手：拖拽提示 —— */
+.ui-sheet__grabber {
+  width: 36px;
+  height: 4px;
+  margin: var(--sp-2) auto var(--sp-4);
+  border-radius: var(--r-pill);
+  background: rgba(var(--ink-rgb) / .18);
+  flex-shrink: 0;
+}
+
+.ui-sheet__title {
+  padding: 0 var(--sp-1) var(--sp-3);
+  font-family: var(--font-ui);
+  font-size: var(--fs-title-section);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-tight);
+  flex-shrink: 0;
+}
+
+.ui-sheet__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-bottom: var(--sp-2);
+}
+
+.ui-sheet__foot {
+  display: flex;
+  gap: var(--sp-3);
+  padding-top: var(--sp-4);
+  flex-shrink: 0;
+}
+.ui-sheet__foot .ui-btn { flex: 1; }
+
+/* —— 操作表：一组纵向选项 —— */
+.ui-actions {
+  display: grid;
+  gap: var(--sp-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ui-actions__item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  width: 100%;
+  min-height: var(--touch);
+  padding: var(--sp-3) var(--sp-4);
+  border: 0;
+  border-radius: var(--r-md);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: var(--fs-body);
+  text-align: left;
+}
+.ui-actions__item:hover { background: var(--accent-soft); }
+.ui-actions__item--danger { color: var(--error); }
+
+/* —— 独立确认块：贴着操作表底部的取消 —— */
+.ui-actions__cancel {
+  justify-content: center;
+  margin-top: var(--sp-2);
+  font-weight: var(--fw-medium);
+  color: var(--text-secondary);
+}

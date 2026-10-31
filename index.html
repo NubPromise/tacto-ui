@@ -1,0 +1,1425 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tacto UI v1.0.0 — 组件与设计规范</title>
+<script>
+  // 首帧即使用目标主题，避免深色用户先看到白屏。
+  const initialTheme = new URLSearchParams(location.search).get('theme');
+  document.documentElement.dataset.theme = initialTheme === 'dark' ||
+    (initialTheme !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+</script>
+<link rel="stylesheet" href="./tokens/tokens.css">
+<link rel="stylesheet" href="./components/base.css">
+<link rel="stylesheet" href="./components/button.css">
+<link rel="stylesheet" href="./components/field.css">
+<link rel="stylesheet" href="./components/card.css">
+<link rel="stylesheet" href="./components/list.css">
+<link rel="stylesheet" href="./components/badge.css">
+<link rel="stylesheet" href="./components/avatar.css">
+<link rel="stylesheet" href="./components/switch.css">
+<link rel="stylesheet" href="./components/segmented.css">
+<link rel="stylesheet" href="./components/dialog.css">
+<link rel="stylesheet" href="./components/sheet.css">
+<link rel="stylesheet" href="./components/toast.css">
+<link rel="stylesheet" href="./components/dock.css">
+<link rel="stylesheet" href="./components/bubble.css">
+<link rel="stylesheet" href="./components/skeleton.css">
+<link rel="stylesheet" href="./components/select.css">
+<link rel="stylesheet" href="./components/states.css">
+<link rel="stylesheet" href="./components/page-header.css">
+<link rel="stylesheet" href="./components/feed.css">
+<link rel="stylesheet" href="./components/user-list.css">
+<link rel="stylesheet" href="./components/voice.css">
+<link rel="stylesheet" href="./components/refresh.css">
+<link rel="stylesheet" href="./components/banner.css">
+<link rel="stylesheet" href="./components/app-grid.css">
+<link rel="stylesheet" href="./components/search.css">
+<link rel="stylesheet" href="./components/viewer.css">
+<link rel="stylesheet" href="./components/profile-header.css">
+<link rel="stylesheet" href="./pages/login.css">
+<style>
+  /* 规范页自身的排版，不属于组件库 */
+  body { background: var(--bg-page); }
+
+  .spec-shell { display: grid; grid-template-columns: 220px minmax(0, 1fr); min-height: 100dvh; }
+
+  .spec-nav {
+    position: sticky; top: 0; align-self: start;
+    height: 100dvh; overflow-y: auto;
+    padding: var(--sp-6) var(--sp-4);
+    border-right: 1px solid var(--border);
+    background: var(--bg-card);
+  }
+  .spec-nav__brand {
+    font-family: var(--font-ui); font-size: var(--fs-card-title);
+    font-weight: var(--fw-bold); letter-spacing: var(--ls-tight);
+    margin-bottom: var(--sp-1);
+  }
+  .spec-nav__note { font-size: var(--fs-meta); color: var(--text-tertiary); margin-bottom: var(--sp-5); }
+  .spec-nav a {
+    display: block; padding: 7px var(--sp-3); border-radius: var(--r-sm);
+    color: var(--text-secondary); font-size: var(--fs-body-small); text-decoration: none;
+  }
+  .spec-nav a:hover { background: var(--accent-soft); color: var(--accent-deep); }
+  .spec-nav__group {
+    margin: var(--sp-4) 0 var(--sp-1); padding: 0 var(--sp-3);
+    font-size: 11px; font-weight: var(--fw-semibold);
+    letter-spacing: .06em; color: var(--text-tertiary); text-transform: uppercase;
+  }
+  .spec-directory > summary { display: none; }
+
+  .spec-main { padding: var(--sp-8) clamp(20px, 4vw, 56px) 96px; max-width: 1080px; }
+  .spec-main { min-width: 0; }
+  .spec-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--sp-4); margin-bottom: var(--sp-8); }
+  .spec-head h1 { font-family: var(--font-ui); font-size: 32px; font-weight: var(--fw-bold); letter-spacing: var(--ls-tighter); }
+  .spec-head p { margin-top: var(--sp-2); color: var(--text-secondary); font-size: var(--fs-body); max-width: 56ch; }
+
+  .spec-section { padding-top: var(--sp-8); margin-top: var(--sp-8); border-top: 1px solid var(--border); }
+  .spec-section:first-of-type { border-top: 0; margin-top: 0; }
+  .spec-section__title { font-family: var(--font-ui); font-size: var(--fs-title-page); font-weight: var(--fw-bold); letter-spacing: var(--ls-tight); }
+  .spec-section__desc { margin-top: var(--sp-2); color: var(--text-secondary); font-size: var(--fs-body-small); line-height: 1.7; max-width: 68ch; }
+
+  /* 每个示例独立成块，互不影响 */
+  .demo {
+    margin-top: var(--sp-5);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    background: var(--bg-card);
+    overflow: hidden;
+  }
+  .demo__label {
+    display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3);
+    padding: var(--sp-2) var(--sp-4);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-card-soft);
+    font-size: var(--fs-meta); color: var(--text-tertiary);
+    font-family: var(--font-mono);
+  }
+  .demo__label code { color: var(--text-secondary); }
+  .demo--overflow { overflow: visible; }
+  .demo--overflow .demo__label { border-radius: var(--r-lg) var(--r-lg) 0 0; }
+  .demo__label { flex-wrap: wrap; }
+  .demo__label code { overflow-wrap: anywhere; }
+  .demo__body { padding: var(--sp-5); display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3); }
+  .demo__body--stack { display: grid; gap: var(--sp-3); }
+  .demo__body--plain { display: block; padding: 0; }
+  .demo__body--center { justify-content: center; }
+
+  /* 令牌展示 */
+  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: var(--sp-3); }
+  .swatch { border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden; }
+  .swatch__chip { height: 56px; }
+  .swatch__meta { padding: var(--sp-2) var(--sp-3); background: var(--bg-card); }
+  .swatch__name { font-size: var(--fs-meta); font-weight: var(--fw-medium); }
+  .swatch__value { font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); }
+
+  .type-row { display: flex; align-items: baseline; gap: var(--sp-4); padding: var(--sp-3) 0; border-bottom: 1px solid var(--border); }
+  .type-row:last-child { border-bottom: 0; }
+  .type-row__meta { width: 128px; flex-shrink: 0; font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); }
+
+  .scale-row { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-2) 0; }
+  .scale-row__bar { height: 14px; border-radius: 3px; background: var(--accent-soft); border: 1px solid var(--accent); }
+  .scale-row__meta { font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); width: 92px; }
+
+  .radius-row { display: flex; flex-wrap: wrap; gap: var(--sp-4); }
+  .radius-box {
+    display: grid; place-items: center;
+    width: 84px; height: 84px;
+    border: 1px solid var(--accent); background: var(--accent-soft);
+    font-family: var(--font-mono); font-size: 11px; color: var(--accent-deep);
+  }
+
+  .theme-toggle { display: inline-flex; flex-shrink: 0; gap: 2px; padding: 3px; border-radius: var(--r-pill); background: var(--bg-card-soft); }
+  .theme-toggle button {
+    min-height: var(--touch); padding: 0 var(--sp-3); border: 0; border-radius: var(--r-pill); white-space: nowrap;
+    background: transparent; color: var(--text-secondary); font-size: var(--fs-meta);
+  }
+  .theme-toggle button[aria-pressed='true'] { background: var(--bg-card); color: var(--text-primary); box-shadow: var(--shadow-soft); }
+
+  .spec-tip {
+    margin-top: var(--sp-4); padding: var(--sp-3) var(--sp-4);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 var(--r-sm) var(--r-sm) 0;
+    background: var(--accent-soft);
+    font-size: var(--fs-body-small); line-height: 1.65; color: var(--text-primary);
+  }
+  .spec-tip strong { font-weight: var(--fw-semibold); }
+
+  @media (max-width: 860px) {
+    .spec-shell { display: block; }
+    .spec-nav { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--border); }
+    .spec-directory > summary { display: list-item; min-height: var(--touch); padding: var(--sp-3) 0; cursor: pointer; }
+    .spec-nav__links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px; }
+    .spec-nav__group { grid-column: 1 / -1; }
+    .spec-nav a { min-height: var(--touch); display: flex; align-items: center; }
+    .spec-head { flex-direction: column; }
+    .spec-head h1 { font-size: clamp(22px, 6vw, 28px); }
+    .type-row { flex-direction: column; gap: var(--sp-1); }
+    .type-row__meta { width: auto; }
+  }
+</style>
+</head>
+<body>
+<a class="ui-skip" href="#main">跳到主要内容</a>
+
+<div class="spec-shell">
+  <nav class="spec-nav" aria-label="组件目录">
+    <div class="spec-nav__brand">Tacto UI</div>
+    <div class="spec-nav__note">移动端 Web UI 工具箱 · v1.0.0</div>
+    <details class="spec-directory" open>
+    <summary>组件目录</summary>
+    <div class="spec-nav__links">
+      <div class="spec-nav__group">基础</div>
+      <a href="#tokens">设计令牌</a>
+      <a href="#typography">排版</a>
+      <div class="spec-nav__group">组件</div>
+      <a href="#button">按钮</a>
+      <a href="#field">表单字段</a>
+      <a href="#select">下拉选择</a>
+      <a href="#card">卡片</a>
+      <a href="#list">列表</a>
+      <a href="#feed">内容卡与评论</a>
+      <a href="#user-list">用户行</a>
+      <a href="#profile">资料头</a>
+      <a href="#badge">徽标</a>
+      <a href="#avatar">头像</a>
+      <a href="#app-grid">应用宫格</a>
+      <a href="#banner">横幅与轮播</a>
+      <a href="#voice">语音条</a>
+      <a href="#switch">开关</a>
+      <a href="#segmented">分段控件</a>
+      <a href="#states">空 / 错误 / 加载</a>
+      <a href="#skeleton">骨架屏</a>
+      <a href="#refresh">下拉刷新</a>
+      <a href="#dialog">对话框</a>
+      <a href="#sheet">底部面板</a>
+      <a href="#toast">轻提示</a>
+      <a href="#dock">导航</a>
+      <a href="#search">搜索</a>
+      <a href="#viewer">图片查看</a>
+      <a href="#bubble">对话气泡</a>
+      <div class="spec-nav__group">页面模板</div>
+      <a href="#login">登录页</a>
+      <a href="./test/components.html">组合与主题验证</a>
+    </div>
+    </details>
+  </nav>
+
+  <main class="spec-main" id="main">
+    <header class="spec-head">
+      <div>
+        <h1>移动端组件与设计规范</h1>
+        <p>零构建、原生 CSS 与 ES Modules。共享设计令牌与基础样式，按需加载组件；支持深浅色、高对比度、减少动画与减少透明度偏好。</p>
+      </div>
+      <div class="theme-toggle" role="group" aria-label="主题">
+        <button type="button" data-theme-btn="light" aria-pressed="true">浅色</button>
+        <button type="button" data-theme-btn="dark" aria-pressed="false">深色</button>
+        <button type="button" data-theme-btn="auto" aria-pressed="false">跟随系统</button>
+      </div>
+    </header>
+
+    <!-- ============ 令牌 ============ -->
+    <section class="spec-section" id="tokens">
+      <h2 class="spec-section__title">设计令牌</h2>
+      <p class="spec-section__desc">集中定义主题角色与通用尺度；组件保留自身的局部几何尺寸。颜色使用语义变量，自定义主题时分别设置强调文字与实色操作背景。</p>
+
+      <div class="demo">
+        <div class="demo__label"><span>基础色板</span><code>--blue / --mint / --peach / --violet</code></div>
+        <div class="demo__body demo__body--stack">
+          <div class="swatches">
+            <div class="swatch"><div class="swatch__chip" style="background:var(--blue)"></div><div class="swatch__meta"><div class="swatch__name">主色 blue</div><div class="swatch__value">#2368f5</div></div></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--blue-deep)"></div><div class="swatch__meta"><div class="swatch__name">主色深 blue-deep</div><div class="swatch__value">#1750c8</div></div></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--mint)"></div><div class="swatch__meta"><div class="swatch__name">成功 mint</div><div class="swatch__value">#2fbf9a</div></div></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--peach)"></div><div class="swatch__meta"><div class="swatch__name">警告 peach</div><div class="swatch__value">#ff9c78</div></div></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--danger)"></div><div class="swatch__meta"><div class="swatch__name">危险 danger</div><div class="swatch__value">#ff3b30</div></div></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--violet)"></div><div class="swatch__meta"><div class="swatch__name">辅助 violet</div><div class="swatch__value">#7758f4</div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo">
+        <div class="demo__label"><span>语义色与表面</span><code>--text-primary / --bg-card / --border</code></div>
+        <div class="demo__body demo__body--stack">
+          <div class="swatches">
+            <div class="swatch"><div class="swatch__chip" style="background:var(--bg-page)"></div><div class="swatch__meta"><div class="swatch__name">页面底</div><div class="swatch__value">--bg-page</div></div></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--bg-card)"></div><div class="swatch__meta"><div class="swatch__name">卡片</div><div class="swatch__value">--bg-card</div></div></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--bg-card-soft)"></div><div class="swatch__meta"><div class="swatch__name">次级表面</div><div class="swatch__value">--bg-card-soft</div></div></div>
+            <div class="swatch"><div class="swatch__chip" style="background:var(--accent-soft)"></div><div class="swatch__meta"><div class="swatch__name">强调柔和底</div><div class="swatch__value">--accent-soft</div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo">
+        <div class="demo__label"><span>间距尺度（4dp 基础）</span><code>--sp-1 … --sp-8</code></div>
+        <div class="demo__body demo__body--stack">
+          <div class="scale-row"><span class="scale-row__meta">--sp-1 · 4</span><div class="scale-row__bar" style="width:4px"></div></div>
+          <div class="scale-row"><span class="scale-row__meta">--sp-2 · 8</span><div class="scale-row__bar" style="width:8px"></div></div>
+          <div class="scale-row"><span class="scale-row__meta">--sp-3 · 12</span><div class="scale-row__bar" style="width:12px"></div></div>
+          <div class="scale-row"><span class="scale-row__meta">--sp-4 · 16</span><div class="scale-row__bar" style="width:16px"></div></div>
+          <div class="scale-row"><span class="scale-row__meta">--sp-5 · 20</span><div class="scale-row__bar" style="width:20px"></div></div>
+          <div class="scale-row"><span class="scale-row__meta">--sp-6 · 24</span><div class="scale-row__bar" style="width:24px"></div></div>
+          <div class="scale-row"><span class="scale-row__meta">--sp-8 · 32</span><div class="scale-row__bar" style="width:32px"></div></div>
+        </div>
+      </div>
+
+      <div class="demo">
+        <div class="demo__label"><span>圆角</span><code>--r-sm … --r-pill</code></div>
+        <div class="demo__body">
+          <div class="radius-box" style="border-radius:var(--r-sm)">12</div>
+          <div class="radius-box" style="border-radius:var(--r-md)">16</div>
+          <div class="radius-box" style="border-radius:var(--r-lg)">20</div>
+          <div class="radius-box" style="border-radius:var(--r-xl)">24</div>
+          <div class="radius-box" style="border-radius:var(--r-2xl)">28</div>
+          <div class="radius-box" style="border-radius:var(--r-pill)">999</div>
+        </div>
+      </div>
+
+      <div class="spec-tip"><strong>层级规则：</strong>内容区一律用实色卡 + 柔和阴影；玻璃只给控制层（导航、悬浮按钮、弹层）。这条规则决定了整站的视觉重心——内容实、控件轻。</div>
+    </section>
+
+    <!-- ============ 排版 ============ -->
+    <section class="spec-section" id="typography">
+      <h2 class="spec-section__title">排版</h2>
+      <p class="spec-section__desc">字号角色覆盖 28px 页面大标题至 12px 辅助信息与导航标签。字重取中间档（650 / 550 / 450），可变字体呈现对应字重，静态字体使用设备回退。</p>
+
+      <div class="demo">
+        <div class="demo__label"><span>字号层级</span><code>--fs-large-title … --fs-nav</code></div>
+        <div class="demo__body demo__body--stack">
+          <div class="type-row"><span class="type-row__meta">28 / 700</span><span class="ui-h1">页面大标题</span></div>
+          <div class="type-row"><span class="type-row__meta">22 / 700</span><span class="ui-h2">页面标题</span></div>
+          <div class="type-row"><span class="type-row__meta">18 / 700</span><span class="ui-h3">分区标题</span></div>
+          <div class="type-row"><span class="type-row__meta">16 / 600</span><span class="ui-h4">卡片标题</span></div>
+          <div class="type-row"><span class="type-row__meta">15 / 450</span><span class="ui-body">正文内容，行高 1.65，长文本阅读优先</span></div>
+          <div class="type-row"><span class="type-row__meta">13 / 450</span><span class="ui-small">辅助信息与说明文字</span></div>
+          <div class="type-row"><span class="type-row__meta">12 / 450</span><span class="ui-meta">标签、时间戳、计数</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 按钮 ============ -->
+    <section class="spec-section" id="button">
+      <h2 class="spec-section__title">按钮</h2>
+      <p class="spec-section__desc">四种变体、三种尺寸。最小高度 48px 保证触控目标；一屏内只允许一个主按钮。按压用缩放（scale 0.96）而非变色，保持颜色语义稳定。</p>
+
+      <div class="demo">
+        <div class="demo__label"><span>变体</span><code>.ui-btn · --primary · --ghost · --danger</code></div>
+        <div class="demo__body">
+          <button class="ui-btn ui-btn--primary">主操作</button>
+          <button class="ui-btn">次级操作</button>
+          <button class="ui-btn ui-btn--ghost">幽灵按钮</button>
+          <button class="ui-btn ui-btn--danger">删除</button>
+        </div>
+      </div>
+
+      <div class="demo">
+        <div class="demo__label"><span>尺寸</span><code>--sm · 默认 · --lg · --block</code></div>
+        <div class="demo__body">
+          <button class="ui-btn ui-btn--primary ui-btn--sm">小按钮</button>
+          <button class="ui-btn ui-btn--primary">默认</button>
+          <button class="ui-btn ui-btn--primary ui-btn--lg">大按钮</button>
+        </div>
+      </div>
+
+      <div class="demo">
+        <div class="demo__label"><span>状态</span><code>:disabled · .is-loading · [aria-pressed]</code></div>
+        <div class="demo__body">
+          <button class="ui-btn ui-btn--primary" disabled>不可用</button>
+          <button class="ui-btn ui-btn--primary is-loading">提交中</button>
+          <button class="ui-btn" aria-pressed="true">已选中</button>
+          <button class="ui-btn" aria-pressed="false">未选中</button>
+        </div>
+      </div>
+
+      <div class="demo">
+        <div class="demo__label"><span>组合与整宽</span><code>.ui-btn-group · --block</code></div>
+        <div class="demo__body demo__body--stack">
+          <div class="ui-btn-group">
+            <button class="ui-btn">取消</button>
+            <button class="ui-btn ui-btn--primary">确定</button>
+          </div>
+          <button class="ui-btn ui-btn--primary ui-btn--block">整宽主按钮</button>
+        </div>
+      </div>
+
+      <div class="spec-tip"><strong>无障碍：</strong>图标按钮必须有 <code>aria-label</code>；加载态用 <code>.is-loading</code> 并配合 <code>aria-busy="true"</code>；不可用用原生 <code>disabled</code>，不要只用透明度模拟。</div>
+    </section>
+
+    <!-- ============ 表单 ============ -->
+    <section class="spec-section" id="field">
+      <h2 class="spec-section__title">表单字段</h2>
+      <p class="spec-section__desc">输入框高度不低于 48px、字号不低于 16px（避免 iOS 聚焦时自动放大页面）。标签必须可见，不用 placeholder 代替标签；错误用「边框变色 + 文字说明」双通道。</p>
+
+      <div class="demo">
+        <div class="demo__label"><span>基础字段</span><code>.ui-field</code></div>
+        <div class="demo__body demo__body--stack">
+          <label class="ui-field">
+            <span class="ui-field__label">显示名称</span>
+            <input class="ui-field__input" placeholder="请输入名称">
+            <span class="ui-field__hint">最多 20 个字符，随时可以修改。</span>
+          </label>
+          <label class="ui-field">
+            <span class="ui-field__label">类型</span>
+            <select class="ui-field__select">
+              <option>标准</option>
+              <option>紧凑</option>
+            </select>
+          </label>
+          <label class="ui-field">
+            <span class="ui-field__label">备注</span>
+            <textarea class="ui-field__textarea" placeholder="补充说明"></textarea>
+          </label>
+        </div>
+      </div>
+
+      <div class="demo">
+        <div class="demo__label"><span>错误与成功</span><code>.is-invalid · .is-valid</code></div>
+        <div class="demo__body demo__body--stack">
+          <label class="ui-field is-invalid">
+            <span class="ui-field__label">邮箱<span class="ui-field__required">*</span></span>
+            <input class="ui-field__input" value="not-an-email" aria-invalid="true">
+            <span class="ui-field__error" role="alert">请输入有效的邮箱地址</span>
+          </label>
+          <label class="ui-field is-valid">
+            <span class="ui-field__label">邀请码</span>
+            <input class="ui-field__input" value="WELCOME">
+            <span class="ui-field__hint">邀请码有效。</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="demo">
+        <div class="demo__label"><span>带操作按钮</span><code>.ui-field__wrap · .ui-field__affix</code></div>
+        <div class="demo__body demo__body--stack">
+          <label class="ui-field">
+            <span class="ui-field__label">密码</span>
+            <span class="ui-field__wrap">
+              <input class="ui-field__input" type="password" value="password">
+              <button class="ui-field__affix" type="button" aria-label="显示密码">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <div class="demo">
+        <div class="demo__label"><span>勾选行</span><code>.ui-choice</code></div>
+        <div class="demo__body demo__body--stack">
+          <label class="ui-choice">
+            <input type="checkbox" checked>
+            <span class="ui-choice__copy">
+              <strong>接收更新通知</strong>
+              <small>重要变更会通过邮件提醒，可随时关闭。</small>
+            </span>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 下拉选择 ============ -->
+    <section class="spec-section" id="select">
+      <h2 class="spec-section__title">下拉选择</h2>
+      <p class="spec-section__desc">原生 <code>&lt;select&gt;</code> 的弹层无法定制，这里用按钮 + 列表实现，但按 combobox 模式保留完整键盘操作。焦点始终留在触发器上，用 <code>aria-activedescendant</code> 指向当前项——移动端不会出现键盘弹起又收起。</p>
+
+      <div class="demo demo--overflow">
+        <div class="demo__label"><span id="select-plan-label">套餐</span><code>.ui-select</code></div>
+        <div class="demo__body demo__body--stack" style="max-width:320px">
+          <div class="ui-select" id="demo-select">
+            <button class="ui-select__trigger" type="button" aria-labelledby="select-plan-label" aria-expanded="false" aria-haspopup="listbox">
+              <span>标准版</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <div class="ui-select__menu" role="listbox" hidden>
+              <button class="ui-select__option" role="option" aria-selected="true" data-value="standard">
+                <span>标准版</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg>
+              </button>
+              <button class="ui-select__option" role="option" aria-selected="false" data-value="pro">
+                <span>专业版</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg>
+              </button>
+              <button class="ui-select__option" role="option" aria-selected="false" data-value="team">
+                <span>团队版</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="spec-tip"><strong>键盘：</strong>↑ ↓ 移动，Enter / Space 选中，Esc 关闭，Home / End 跳首尾。下方空间不足时自动向上展开（<code>.is-up</code>）。</div>
+    </section>
+
+    <!-- ============ 卡片 ============ -->
+    <section class="spec-section" id="card">
+      <h2 class="spec-section__title">卡片</h2>
+      <p class="spec-section__desc">内容容器的基础单位。实色卡承载内容，玻璃卡只用于需要浮在内容之上的场景。可点击的卡片整块是链接，而不是只有标题可点。</p>
+
+      <div class="demo">
+        <div class="demo__label"><span>基础卡片</span><code>.ui-card</code></div>
+        <div class="demo__body demo__body--stack">
+          <section class="ui-card">
+            <header class="ui-card__head">
+              <h3 class="ui-card__title">卡片标题</h3>
+              <span class="ui-card__extra">刚刚</span>
+            </header>
+            <div class="ui-card__body">卡片用于承载一组相关信息。标题与辅助信息在同一行，正文独占一行，底部放操作。</div>
+            <footer class="ui-card__foot"><span>更新于 14:02</span><button class="ui-btn ui-btn--ghost ui-btn--sm">查看</button></footer>
+          </section>
+        </div>
+      </div>
+
+      <div class="demo">
+        <div class="demo__label"><span>变体</span><code>--soft · --glass · --accent</code></div>
+        <div class="demo__body demo__body--stack">
+          <div class="ui-card ui-card--soft">柔和底卡片，用于次级信息分组。</div>
+          <div class="ui-card ui-card--accent">强调卡片：左侧色条提示状态，不额外加边框。</div>
+          <div class="ui-card ui-card--glass">玻璃卡片，仅用于浮层内的内容。</div>
+        </div>
+      </div>
+
+      <div class="demo">
+        <div class="demo__label"><span>指标与进度</span><code>.ui-metric · .ui-progress</code></div>
+        <div class="demo__body demo__body--stack">
+          <section class="ui-card ui-card--lg">
+            <div class="ui-metric">
+              <span class="ui-metric__label">本月用量</span>
+              <span class="ui-metric__value">72%</span>
+            </div>
+            <div class="ui-progress" style="margin-top:16px"><div class="ui-progress__bar" style="width:72%"></div></div>
+          </section>
+        </div>
+      </div>
+
+      <div class="demo">
+        <div class="demo__label"><span>提示条</span><code>.ui-alert</code></div>
+        <div class="demo__body demo__body--stack">
+          <div class="ui-alert"><div><div class="ui-alert__title">提示</div>这条信息需要用户注意到，但不打断当前操作。</div></div>
+          <div class="ui-alert ui-alert--success">操作已成功完成。</div>
+          <div class="ui-alert ui-alert--warning">当前配置可能影响已有数据，请确认后继续。</div>
+          <div class="ui-alert ui-alert--error">请求失败，请稍后重试。</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 列表 ============ -->
+    <section class="spec-section" id="list">
+      <h2 class="spec-section__title">列表</h2>
+      <p class="spec-section__desc">设置页与导航的核心结构。整行可点，行高不低于 48px；箭头只在真的会跳转时出现。危险操作整行变红，并且不放在列表中间。</p>
+
+      <div class="demo">
+        <div class="demo__label"><span>导航行</span><code>.ui-list · .ui-row</code></div>
+        <div class="demo__body demo__body--plain">
+          <ul class="ui-list">
+            <li><a class="ui-row" href="#list">
+              <span class="ui-row__mark" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+              </span>
+              <span class="ui-row__copy"><strong>账号与资料</strong><small>名称、头像、简介</small></span>
+              <span class="ui-row__arrow" aria-hidden="true">›</span>
+            </a></li>
+            <li><a class="ui-row" href="#list">
+              <span class="ui-row__mark" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 9h18"/></svg>
+              </span>
+              <span class="ui-row__copy"><strong>订阅与账单</strong><small>当前方案与历史记录</small></span>
+              <span class="ui-row__value">标准版</span>
+              <span class="ui-row__arrow" aria-hidden="true">›</span>
+            </a></li>
+            <li><a class="ui-row ui-row--danger" href="#list">
+              <span class="ui-row__mark" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+              </span>
+              <span class="ui-row__copy"><strong>退出登录</strong></span>
+            </a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="demo">
+        <div class="demo__label"><span>键值详情</span><code>.ui-kv</code></div>
+        <div class="demo__body demo__body--stack">
+          <dl class="ui-kv">
+            <div><dt>创建时间</dt><dd>2026-10-31 14:02</dd></div>
+            <div><dt>状态</dt><dd>正常</dd></div>
+            <div><dt>标识</dt><dd>usr_8f2c1a</dd></div>
+          </dl>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 内容卡 ============ -->
+    <section class="spec-section" id="feed">
+      <h2 class="spec-section__title">内容卡与评论</h2>
+      <p class="spec-section__desc">信息流的基本单元。卡片之间只靠间距分隔，不叠边框。图片网格按数量自适应：1 张大图、2 张两列、3 张以上三列，最多 6 张并显示 +N。互动条右对齐，点赞态用「换色 + 填充」双通道。</p>
+
+      <div class="demo">
+        <div class="demo__label"><span>内容卡</span><code>.ui-post</code></div>
+        <div class="demo__body demo__body--plain" style="padding:16px">
+          <div class="ui-feed">
+            <article class="ui-post">
+              <header class="ui-post__head">
+                <span class="ui-avatar" data-tone="blue">林</span>
+                <div class="ui-post__author">
+                  <strong>林深</strong>
+                  <span>3 分钟前 · 来自客户端</span>
+                </div>
+                <span class="ui-badge ui-badge--accent">置顶</span>
+                <button class="ui-post__more" aria-label="更多操作">⋯</button>
+              </header>
+              <h3 class="ui-post__title">周末去了趟旧书店</h3>
+              <p class="ui-post__body">二楼靠窗那排几乎没人，翻到一本 1987 年的诗集，扉页上有前任读者写的一行字。店主说这书放了十几年了。</p>
+              <div class="ui-post__images cols-3">
+                <div class="ui-post__cell" style="background:linear-gradient(135deg,#c9d9f0,#8fa9cc)"></div>
+                <div class="ui-post__cell" style="background:linear-gradient(135deg,#e6d8c8,#c2a98e)"></div>
+                <div class="ui-post__cell ui-post__cell--more" style="background:linear-gradient(135deg,#d8cde8,#a794c9)">
+                  <span class="ui-post__cell-more">+4</span>
+                </div>
+              </div>
+              <footer class="ui-post__meta">
+                <button class="is-liked" aria-label="点赞，28 人赞过" aria-pressed="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l8.8 8.8 8.8-8.8a5.5 5.5 0 0 0 0-7.8z"/></svg>
+                  28
+                </button>
+                <button aria-label="查看 6 条评论">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                  6
+                </button>
+                <button aria-label="推荐这条动态" aria-pressed="false">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8h4v-8zM8 20h9a2 2 0 0 0 2-1.6l1.4-7A2 2 0 0 0 18.4 9H14V5a2 2 0 0 0-2-2z"/></svg>
+                </button>
+              </footer>
+            </article>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo">
+        <div class="demo__label"><span>评论区</span><code>.ui-comment</code></div>
+        <div class="demo__body demo__body--plain" style="padding:16px">
+          <div class="ui-comment">
+            <div class="ui-comment__row">
+              <span class="ui-avatar ui-avatar--xs" data-tone="mint">周</span>
+              <div class="ui-comment__main">
+                <div class="ui-comment__name">周一</div>
+                <p class="ui-comment__text">这书我也见过，是不是蓝皮那本？</p>
+                <div class="ui-comment__ops">
+                  <time>2 分钟前</time>
+                  <button>回复</button>
+                  <button class="is-liked" aria-label="赞这条评论，3 人赞过" aria-pressed="true">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l8.8 8.8 8.8-8.8a5.5 5.5 0 0 0 0-7.8z"/></svg>
+                    3
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="ui-comment__replies">
+              <div class="ui-comment__reply">
+                <span class="ui-avatar ui-avatar--xs" data-tone="blue">林</span>
+                <div class="ui-comment__main">
+                  <div class="ui-comment__name">林深 <span class="ui-meta ui-faint">回复 周一</span></div>
+                  <p class="ui-comment__text">对，书脊已经开胶了。</p>
+                </div>
+              </div>
+            </div>
+            <button class="ui-comment__expand">查看全部 6 条回复 ›</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 用户行 ============ -->
+    <section class="spec-section" id="user-list">
+      <h2 class="spec-section__title">用户行</h2>
+      <p class="spec-section__desc">关注列表、粉丝列表、群成员、@ 提及共用同一结构。行高不低于 64px，尾部只能有一个操作，避免误触。</p>
+
+      <div class="demo">
+        <div class="demo__label"><span>列表</span><code>.ui-user-list · .ui-user-row</code></div>
+        <div class="demo__body demo__body--plain" style="padding:16px">
+          <div class="ui-user-list">
+            <a class="ui-user-row" href="#user-list">
+              <span class="ui-avatar ui-avatar--md" data-tone="blue">陈</span>
+              <span class="ui-user-row__main">
+                <span class="ui-user-row__name">陈屿</span>
+                <span class="ui-user-row__meta">128 关注 · 1.2k 粉丝</span>
+              </span>
+              <button class="ui-btn ui-btn--sm">关注</button>
+            </a>
+            <a class="ui-user-row" href="#user-list">
+              <span class="ui-avatar ui-avatar--md" data-tone="mint">苏</span>
+              <span class="ui-user-row__main">
+                <span class="ui-user-row__name">苏木</span>
+                <span class="ui-user-row__meta">已关注你</span>
+              </span>
+              <button class="ui-btn ui-btn--sm" aria-pressed="true">已关注</button>
+            </a>
+            <a class="ui-user-row" href="#user-list">
+              <span class="ui-avatar ui-avatar--md" data-tone="violet">顾</span>
+              <span class="ui-user-row__main">
+                <span class="ui-user-row__name">顾言</span>
+                <span class="ui-user-row__meta">共同关注 3 人</span>
+              </span>
+              <span class="ui-user-row__action" aria-hidden="true">›</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo">
+        <div class="demo__label"><span>通知行</span><code>.ui-notice</code></div>
+        <div class="demo__body demo__body--plain" style="padding:0 16px">
+          <div class="ui-notice">
+            <span class="ui-notice__icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+            </span>
+            <span class="ui-notice__content">
+              <span class="ui-notice__text">有人回复了你的评论</span>
+              <span class="ui-notice__time">12 分钟前</span>
+            </span>
+            <span class="ui-notice__dot" aria-label="未读"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 资料头 ============ -->
+    <section class="spec-section" id="profile">
+      <h2 class="spec-section__title">资料头</h2>
+      <p class="spec-section__desc">个人主页顶部。头像 88px，简介最多三行，数据用等宽数字避免刷新时跳动。主操作整宽，次操作收进图标按钮。</p>
+
+      <div class="demo">
+        <div class="demo__label"><span>带渐变背景</span><code>.ui-profile--hero</code></div>
+        <div class="demo__body demo__body--plain">
+          <header class="ui-profile ui-profile--hero">
+            <div class="ui-profile__top">
+              <span class="ui-avatar ui-avatar--xl" data-tone="blue">林</span>
+              <div class="ui-profile__identity">
+                <h3 class="ui-profile__name">林深</h3>
+                <p class="ui-profile__handle">@linshen · 加入 128 天</p>
+              </div>
+            </div>
+            <p class="ui-profile__bio">在旧书店打工，偶尔写点东西。喜欢雨天和纸质书。</p>
+            <div class="ui-profile__stats">
+              <div class="ui-profile__stat"><strong>128</strong><span>关注</span></div>
+              <div class="ui-profile__stat"><strong>1.2k</strong><span>粉丝</span></div>
+              <div class="ui-profile__stat"><strong>346</strong><span>帖子</span></div>
+            </div>
+            <div class="ui-profile__actions">
+              <button class="ui-btn ui-btn--primary">关注</button>
+              <button class="ui-btn">私信</button>
+            </div>
+          </header>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 徽标 ============ -->
+    <section class="spec-section" id="badge">
+      <h2 class="spec-section__title">徽标</h2>
+      <p class="spec-section__desc">状态与分类的轻量标记。文字必须自带语义，不能只靠颜色区分状态——色弱用户同样要能读懂。</p>
+
+      <div class="demo">
+        <div class="demo__label"><span>变体</span><code>--accent · --success · --warning · --error</code></div>
+        <div class="demo__body">
+          <span class="ui-badge">默认</span>
+          <span class="ui-badge ui-badge--accent">进行中</span>
+          <span class="ui-badge ui-badge--success">已完成</span>
+          <span class="ui-badge ui-badge--warning">待确认</span>
+          <span class="ui-badge ui-badge--error">已失败</span>
+          <span class="ui-badge ui-badge--outline">描边</span>
+          <span class="ui-badge ui-badge--sm">小号</span>
+        </div>
+      </div>
+
+      <div class="demo">
+        <div class="demo__label"><span>圆点与计数</span><code>--dot · .ui-badge-count</code></div>
+        <div class="demo__body">
+          <span class="ui-badge ui-badge--dot ui-badge--success"></span>
+          <span class="ui-badge ui-badge--dot ui-badge--warning"></span>
+          <span class="ui-badge ui-badge--dot ui-badge--error"></span>
+          <span class="ui-badge-count">3</span>
+          <span class="ui-badge-count">99+</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 头像 ============ -->
+    <section class="spec-section" id="avatar">
+      <h2 class="spec-section__title">头像</h2>
+      <p class="spec-section__desc">五档尺寸，圆形与圆角矩形两种形态。无图时用首字母兜底，底色由 <code>data-tone</code> 按语义分组，不用随机色——同一个用户每次进来颜色要一致。</p>
+
+      <div class="demo">
+        <div class="demo__label"><span>尺寸</span><code>--xs · 默认 · --md · --lg · --xl</code></div>
+        <div class="demo__body">
+          <span class="ui-avatar ui-avatar--xs">A</span>
+          <span class="ui-avatar">A</span>
+          <span class="ui-avatar ui-avatar--md">A</span>
+          <span class="ui-avatar ui-avatar--lg">A</span>
+          <span class="ui-avatar ui-avatar--xl">A</span>
+        </div>
+      </div>
+
+      <div class="demo">
+        <div class="demo__label"><span>语义底色与形态</span><code>data-tone · --square</code></div>
+        <div class="demo__body">
+          <span class="ui-avatar" data-tone="blue">蓝</span>
+          <span class="ui-avatar" data-tone="mint">绿</span>
+          <span class="ui-avatar" data-tone="peach">橙</span>
+          <span class="ui-avatar" data-tone="violet">紫</span>
+          <span class="ui-avatar ui-avatar--square" data-tone="blue">方</span>
+          <span class="ui-avatar-wrap">
+            <span class="ui-avatar" data-tone="mint">在</span>
+            <span class="ui-avatar-wrap__status ui-avatar-wrap__status--online"></span>
+          </span>
+        </div>
+      </div>
+
+      <div class="demo">
+        <div class="demo__label"><span>叠放组</span><code>.ui-avatar-group</code></div>
+        <div class="demo__body">
+          <span class="ui-avatar-group">
+            <span class="ui-avatar ui-avatar--md" data-tone="blue">甲</span>
+            <span class="ui-avatar ui-avatar--md" data-tone="mint">乙</span>
+            <span class="ui-avatar ui-avatar--md" data-tone="violet">丙</span>
+            <span class="ui-avatar ui-avatar--md" data-tone="peach">+5</span>
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 应用宫格 ============ -->
+    <section class="spec-section" id="app-grid">
+      <h2 class="spec-section__title">应用宫格</h2>
+      <p class="spec-section__desc">固定 4 列，图标 46px。整格可点，按压缩放 0.93。标签最多 4 个字，超出换行而不省略——省略会让用户猜不到入口是什么。</p>
+
+      <div class="demo">
+        <div class="demo__label"><span>默认</span><code>.ui-app-grid</code></div>
+        <div class="demo__body demo__body--plain" style="padding:16px">
+          <div class="ui-app-grid">
+            <a class="ui-app-item" href="#app-grid">
+              <span class="ui-app-item__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>
+              <span class="ui-app-item__label">日历</span>
+            </a>
+            <a class="ui-app-item" href="#app-grid">
+              <span class="ui-app-item__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11H5a2 2 0 0 0-2 2v7h6zM15 3H9v17h6zM21 8h-4v12h4a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2z"/></svg></span>
+              <span class="ui-app-item__label">记账</span>
+            </a>
+            <a class="ui-app-item" href="#app-grid">
+              <span class="ui-app-item__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>
+              <span class="ui-app-item__label">音乐</span>
+            </a>
+            <a class="ui-app-item" href="#app-grid">
+              <span class="ui-app-item__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+              <span class="ui-app-item__label">备忘</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 横幅 ============ -->
+    <section class="spec-section" id="banner">
+      <h2 class="spec-section__title">横幅与轮播</h2>
+      <p class="spec-section__desc">用 CSS scroll-snap 实现，不写自动播放——省电，也不打断阅读。图文叠加时必须有遮罩保证文字对比度。</p>
+
+      <div class="demo">
+        <div class="demo__label"><span>轮播</span><code>.ui-carousel · .ui-banner</code></div>
+        <div class="demo__body demo__body--plain" style="padding:16px">
+          <div class="ui-carousel">
+            <div class="ui-carousel__track">
+              <a class="ui-banner" href="#banner" style="background:linear-gradient(135deg,#2368f5,#7758f4)">
+                <span class="ui-banner__copy">
+                  <span class="ui-banner__title">把常用操作放进底部导航</span>
+                  <span class="ui-banner__desc">三步完成配置，随时可以改回来。</span>
+                </span>
+              </a>
+              <a class="ui-banner" href="#banner" style="background:linear-gradient(135deg,#2fbf9a,#2368f5)">
+                <span class="ui-banner__copy">
+                  <span class="ui-banner__title">夜间模式已经就绪</span>
+                  <span class="ui-banner__desc">跟随系统自动切换，也能手动固定。</span>
+                </span>
+              </a>
+            </div>
+            <div class="ui-carousel__dots" aria-hidden="true"><i aria-current="true"></i><i></i></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo">
+        <div class="demo__label"><span>提示条</span><code>.ui-tipbar</code></div>
+        <div class="demo__body">
+          <span class="ui-tipbar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+            本周有 3 条新公告
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 语音条 ============ -->
+    <section class="spec-section" id="voice">
+      <h2 class="spec-section__title">语音条</h2>
+      <p class="spec-section__desc">波形条数与时长相关（每 2 秒一根，3–5 根）。播放中波形用透明度呼吸而不是位移，避免整条抖动。自己的语音反色显示。</p>
+
+      <div class="demo">
+        <div class="demo__label"><span>状态</span><code>.ui-voice · --mine · .is-playing · .is-error</code></div>
+        <div class="demo__body">
+          <button class="ui-voice" aria-label="播放语音，3 秒">
+            <span class="ui-voice__play" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+            <span class="ui-voice__wave" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="ui-voice__duration">3"</span>
+          </button>
+          <button class="ui-voice is-playing" aria-label="正在播放语音，5 秒">
+            <span class="ui-voice__play" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></span>
+            <span class="ui-voice__wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+            <span class="ui-voice__duration">5"</span>
+          </button>
+          <button class="ui-voice ui-voice--mine" aria-label="播放我的语音，4 秒">
+            <span class="ui-voice__play" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+            <span class="ui-voice__wave" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+            <span class="ui-voice__duration">4"</span>
+          </button>
+          <button class="ui-voice is-error" aria-label="语音播放失败">
+            <span class="ui-voice__play" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></span>
+            <span class="ui-voice__wave" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="ui-voice__duration">失败</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 开关 ============ -->
+    <section class="spec-section" id="switch">
+      <h2 class="spec-section__title">开关</h2>
+      <p class="spec-section__desc">用原生 checkbox 加 <code>role="switch"</code>，保留键盘操作与屏幕阅读器播报。切换动画 220ms，滑块位移而非缩放。</p>
+
+      <div class="demo">
+        <div class="demo__label"><span>状态</span><code>checked · 关闭 · disabled</code></div>
+        <div class="demo__body">
+          <label class="ui-switch"><input type="checkbox" role="switch" aria-label="自动同步" checked><span class="ui-switch__track" aria-hidden="true"></span></label>
+          <label class="ui-switch"><input type="checkbox" role="switch" aria-label="消息提醒"><span class="ui-switch__track" aria-hidden="true"></span></label>
+          <label class="ui-switch"><input type="checkbox" role="switch" aria-label="自动备份" disabled><span class="ui-switch__track" aria-hidden="true"></span></label>
+        </div>
+      </div>
+
+      <div class="demo">
+        <div class="demo__label"><span>带说明的开关行</span><code>.ui-switch-row</code></div>
+        <div class="demo__body demo__body--stack">
+          <label class="ui-switch-row">
+            <span class="ui-switch-row__copy"><strong id="switch-dark-label">深色模式</strong><small id="switch-dark-hint">外观设置示例</small></span>
+            <span class="ui-switch"><input type="checkbox" role="switch" aria-labelledby="switch-dark-label" aria-describedby="switch-dark-hint" checked><span class="ui-switch__track" aria-hidden="true"></span></span>
+          </label>
+          <label class="ui-switch-row">
+            <span class="ui-switch-row__copy"><strong id="switch-notify-label">消息通知</strong><small id="switch-notify-hint">重要变更通过邮件提醒</small></span>
+            <span class="ui-switch"><input type="checkbox" role="switch" aria-labelledby="switch-notify-label" aria-describedby="switch-notify-hint"><span class="ui-switch__track" aria-hidden="true"></span></span>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 分段控件 ============ -->
+    <section class="spec-section" id="segmented">
+      <h2 class="spec-section__title">分段控件与标签栏</h2>
+      <p class="spec-section__desc">2–5 段用分段控件，超过 5 段改用横向滚动的标签栏。选中态用滑块位移，不用下划线；键盘左右键可切换。</p>
+
+      <div class="demo">
+        <div class="demo__label"><span>分段控件</span><code>.ui-seg</code></div>
+        <div class="demo__body demo__body--stack">
+          <div class="ui-seg" role="tablist">
+            <button class="ui-seg__item" role="tab" aria-selected="true">全部</button>
+            <button class="ui-seg__item" role="tab" aria-selected="false">进行中</button>
+            <button class="ui-seg__item" role="tab" aria-selected="false">已完成</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo">
+        <div class="demo__label"><span>标签栏</span><code>.ui-tabs</code></div>
+        <div class="demo__body demo__body--plain">
+          <div class="ui-tabs" role="tablist">
+            <button class="ui-tabs__item" role="tab" aria-selected="true">推荐</button>
+            <button class="ui-tabs__item" role="tab" aria-selected="false">关注</button>
+            <button class="ui-tabs__item" role="tab" aria-selected="false">附近</button>
+            <button class="ui-tabs__item" role="tab" aria-selected="false">最新</button>
+            <button class="ui-tabs__item" role="tab" aria-selected="false">热门</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 对话框 ============ -->
+    <section class="spec-section" id="dialog">
+      <h2 class="spec-section__title">对话框</h2>
+      <p class="spec-section__desc">基于原生 <code>&lt;dialog&gt;</code>，自带焦点陷阱、Esc 关闭与遮罩。危险操作把主按钮换成红色，并把默认焦点放在「取消」上。</p>
+
+      <div class="demo">
+        <div class="demo__label"><span>点击预览</span><code>.ui-dialog</code></div>
+        <div class="demo__body">
+          <button class="ui-btn" data-open="dlg-basic">普通对话框</button>
+          <button class="ui-btn ui-btn--danger" data-open="dlg-danger">危险确认</button>
+        </div>
+      </div>
+
+      <div class="spec-tip"><strong>规范：</strong>标题一句话说清结果，正文补充后果；按钮右对齐、主操作在最右；按钮不超过两个，超过两个改用底部面板的操作表。</div>
+    </section>
+
+    <!-- ============ 底部面板 ============ -->
+    <section class="spec-section" id="sheet">
+      <h2 class="spec-section__title">底部面板</h2>
+      <p class="spec-section__desc">承载选项组或次级表单。顶角 28px、贴安全区，内容超过 85dvh 时内部滚动。必须支持点遮罩、按 Esc、下滑把手三种关闭方式。</p>
+
+      <div class="demo">
+        <div class="demo__label"><span>点击预览</span><code>.ui-sheet · .ui-actions</code></div>
+        <div class="demo__body">
+          <button class="ui-btn" data-open="sheet-actions">操作表</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 轻提示 ============ -->
+    <section class="spec-section" id="toast">
+      <h2 class="spec-section__title">轻提示</h2>
+      <p class="spec-section__desc">只承载「已经发生」的反馈，不承载需要决策的信息。停留 2.4 秒，同一时刻只显示一个，新提示替换旧提示而不是排队。</p>
+
+      <div class="demo">
+        <div class="demo__label"><span>点击预览</span><code>.ui-toast</code></div>
+        <div class="demo__body">
+          <button class="ui-btn" data-toast="success">成功提示</button>
+          <button class="ui-btn" data-toast="error">错误提示</button>
+          <button class="ui-btn" data-toast="plain">普通提示</button>
+        </div>
+      </div>
+
+      <div class="spec-tip"><strong>播报：</strong>普通提示用 <code>role="status"</code>（礼貌播报），错误用 <code>role="alert"</code>（立即播报）。不要给两者都加 <code>aria-live="assertive"</code>。</div>
+    </section>
+
+    <!-- ============ 导航 ============ -->
+    <section class="spec-section" id="dock">
+      <h2 class="spec-section__title">导航</h2>
+      <p class="spec-section__desc">底部胶囊玻璃导航 3–5 项，选中项用「换色 + 加粗」双通道。页面内容要预留 <code>--dock-h</code> 的滚动余量，否则最后一条会被遮住。</p>
+
+      <div class="demo">
+        <div class="demo__label"><span>底部导航</span><code>.ui-dock</code></div>
+        <div class="demo__body demo__body--center" style="padding-block:32px 24px">
+          <nav class="ui-dock" aria-label="主导航示例" style="position:static;transform:none">
+            <a class="ui-dock__item" href="#dock" aria-current="page">
+              <span class="ui-dock__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span>
+              <span class="ui-dock__label">首页</span>
+            </a>
+            <a class="ui-dock__item" href="#dock">
+              <span class="ui-dock__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+              <span class="ui-dock__label">消息</span>
+            </a>
+            <a class="ui-dock__item" href="#dock">
+              <span class="ui-dock__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></span>
+              <span class="ui-dock__label">我的</span>
+            </a>
+          </nav>
+        </div>
+      </div>
+
+      <div class="demo">
+        <div class="demo__label"><span>顶部栏</span><code>.ui-topbar</code></div>
+        <div class="demo__body demo__body--plain">
+          <div class="ui-topbar" style="position:static">
+            <button class="ui-topbar__action" aria-label="返回">‹</button>
+            <span class="ui-topbar__title">页面标题</span>
+            <button class="ui-topbar__action" aria-label="更多">⋯</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 对话气泡 ============ -->
+    <section class="spec-section" id="bubble">
+      <h2 class="spec-section__title">对话气泡</h2>
+      <p class="spec-section__desc">对方在左用浅底，自己在右用强调底。单条最大宽度 78%，长文本自动换行不断词。贴边角收小形成指向感，连续消息只在末条显示时间。</p>
+
+      <div class="demo">
+        <div class="demo__body demo__body--plain">
+          <div class="ui-bubbles">
+            <div class="ui-bubble ui-bubble--in">
+              <div class="ui-bubble__avatar" data-tone="mint" aria-hidden="true"></div>
+              <div class="ui-bubble__content">
+                <div class="ui-bubble__text">今天想聊点什么？</div>
+                <time class="ui-bubble__time">14:02</time>
+              </div>
+            </div>
+            <div class="ui-bubble ui-bubble--out">
+              <div class="ui-bubble__avatar ui-bubble__avatar--ghost" aria-hidden="true"></div>
+              <div class="ui-bubble__content">
+                <div class="ui-bubble__text">帮我把这周的安排理一遍，谢谢。</div>
+                <time class="ui-bubble__time">14:03</time>
+              </div>
+            </div>
+            <div class="ui-bubble ui-bubble--in">
+              <div class="ui-bubble__avatar" data-tone="mint" aria-hidden="true"></div>
+              <div class="ui-bubble__content">
+                <div class="ui-typing" aria-label="正在输入"><span></span><span></span><span></span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo">
+        <div class="demo__label"><span>输入区</span><code>.ui-composer</code></div>
+        <div class="demo__body demo__body--plain">
+          <div class="ui-composer" style="position:static">
+            <textarea class="ui-composer__input" rows="1" placeholder="输入消息…"></textarea>
+            <button class="ui-composer__send" aria-label="发送">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 14-7-7 14-2-5z"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 状态 ============ -->
+    <section class="spec-section" id="states">
+      <h2 class="spec-section__title">空 / 错误 / 加载</h2>
+      <p class="spec-section__desc">三种状态共用一套骨架：图标、标题、说明、一个操作。缺一个都不完整。文案写「能做什么」，不写「暂无数据」；错误要说明原因和下一步，不只写「出错了」。</p>
+
+      <div class="demo">
+        <div class="demo__label"><span>空状态</span><code>.ui-state</code></div>
+        <div class="demo__body demo__body--plain">
+          <div class="ui-state">
+            <span class="ui-state__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </span>
+            <p class="ui-state__title">还没有对话</p>
+            <p class="ui-state__desc">发一条消息就能开始，历史记录会按时间保存在这里。</p>
+            <button class="ui-btn ui-btn--primary ui-btn--sm">开始对话</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo">
+        <div class="demo__label"><span>错误态</span><code>.ui-state--error</code></div>
+        <div class="demo__body demo__body--plain">
+          <div class="ui-state ui-state--error">
+            <span class="ui-state__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>
+            </span>
+            <p class="ui-state__title">加载失败</p>
+            <p class="ui-state__desc">网络似乎不太稳定，请检查后重试。</p>
+            <div class="ui-state__actions">
+              <button class="ui-btn ui-btn--primary ui-btn--sm">重试</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo">
+        <div class="demo__label"><span>加载态与列表底部</span><code>.ui-state--loading · .ui-loadmore</code></div>
+        <div class="demo__body demo__body--plain">
+          <div class="ui-state ui-state--loading" style="padding:32px 24px">
+            <span class="ui-state__icon" aria-hidden="true"><span class="ui-spinner"></span></span>
+            <p class="ui-state__title">正在加载…</p>
+          </div>
+          <div class="ui-loadmore"><span class="ui-spinner"></span>加载更多</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 骨架屏 ============ -->
+    <section class="spec-section" id="skeleton">
+      <h2 class="spec-section__title">骨架屏</h2>
+      <p class="spec-section__desc">骨架形状必须和真实内容一致，否则加载完成时会跳动。只在首次加载用；刷新改用顶部细进度条 <code>.ui-loadbar</code>，不要整页骨架。</p>
+
+      <div class="demo">
+        <div class="demo__label"><span>骨架卡片</span><code>.ui-skeleton · .ui-skeleton-card</code></div>
+        <div class="demo__body demo__body--stack">
+          <div class="ui-skeleton-card">
+            <div class="ui-skeleton ui-skeleton--avatar"></div>
+            <div class="ui-skeleton-card__body">
+              <div class="ui-skeleton ui-skeleton--title"></div>
+              <div class="ui-skeleton ui-skeleton--line"></div>
+              <div class="ui-skeleton ui-skeleton--line"></div>
+            </div>
+          </div>
+          <div class="ui-skeleton ui-skeleton--card"></div>
+          <div class="ui-cluster">
+            <div class="ui-skeleton ui-skeleton--chip"></div>
+            <div class="ui-skeleton ui-skeleton--chip"></div>
+            <div class="ui-skeleton ui-skeleton--chip"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 下拉刷新 ============ -->
+    <section class="spec-section" id="refresh">
+      <h2 class="spec-section__title">下拉刷新</h2>
+      <p class="spec-section__desc">只在滚动容器位于顶部时接管纵向手势，其余情况交还原生滚动。阈值 64px，越往下拉阻尼越强。刷新过程中高度锁定在阈值处，避免内容跳动。</p>
+
+      <div class="demo">
+        <div class="demo__label"><span>四态</span><code>data-state: idle / pulling / ready / loading</code></div>
+        <div class="demo__body demo__body--plain">
+          <div class="ui-refresh" data-state="pulling" style="height:52px">
+            <span class="ui-refresh__indicator"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg></span>
+            <span class="ui-refresh__text">下拉刷新</span>
+          </div>
+          <div class="ui-refresh" data-state="ready" style="height:52px">
+            <span class="ui-refresh__indicator"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg></span>
+            <span class="ui-refresh__text">松手刷新</span>
+          </div>
+          <div class="ui-refresh" data-state="loading" style="height:52px">
+            <span class="ui-refresh__indicator"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg></span>
+            <span class="ui-refresh__text">正在刷新…</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="spec-tip"><strong>手势边界：</strong>用 <code>pointerdown</code> 记录起点，只有 <code>scrollTop === 0</code> 且向下拉时才接管；一旦向上滑立即交还原生滚动，否则页面会卡住。</div>
+    </section>
+
+    <!-- ============ 搜索 ============ -->
+    <section class="spec-section" id="search">
+      <h2 class="spec-section__title">搜索</h2>
+      <p class="spec-section__desc">胶囊输入框，聚焦时边框高亮。「取消」只在需要时出现。命中关键词用 <code>&lt;mark&gt;</code> 加浅强调底，不用黄色——黄色在深色模式下几乎不可读。</p>
+
+      <div class="demo">
+        <div class="demo__label"><span>搜索框</span><code>.ui-search</code></div>
+        <div class="demo__body demo__body--plain" style="padding-top:16px">
+          <div class="ui-search">
+            <label class="ui-search__box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+              <input type="search" aria-label="搜索帖子或用户" placeholder="搜索帖子、用户" value="旧书">
+            </label>
+            <button class="ui-search__cancel" type="button">取消</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo">
+        <div class="demo__label"><span>结果行</span><code>.ui-result · mark.ui-hl</code></div>
+        <div class="demo__body demo__body--plain" style="padding:0 16px 16px">
+          <button class="ui-result">
+            <span class="ui-result__main">
+              <span class="ui-result__title">周末去了趟<mark class="ui-hl">旧书</mark>店</span>
+              <span class="ui-result__snippet">二楼靠窗那排几乎没人，翻到一本 1987 年的诗集，扉页上有前任读者写的一行字。</span>
+              <span class="ui-result__meta"><span>林深</span><span>28 赞</span><span>3 分钟前</span></span>
+            </span>
+            <span aria-hidden="true">›</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 图片查看 ============ -->
+    <section class="spec-section" id="viewer">
+      <h2 class="spec-section__title">图片查看</h2>
+      <p class="spec-section__desc">全屏黑底，图片 contain 不裁切。单击关闭、双击放大到 2 倍，多图左右滑动并在底部显示页码。关闭后焦点回到触发缩略图。</p>
+
+      <div class="demo">
+        <div class="demo__label"><span>内联预览（真实使用时全屏固定）</span><code>.ui-viewer</code></div>
+        <div class="demo__body demo__body--plain" style="padding:16px">
+          <div class="ui-viewer" style="position:relative;inset:auto;height:320px;border-radius:20px;overflow:hidden">
+            <button class="ui-viewer__close" aria-label="关闭">×</button>
+            <div class="ui-viewer__stage" style="background:linear-gradient(135deg,#2b3446,#4b5b78)"></div>
+            <div class="ui-viewer__counter">2 / 5</div>
+            <div class="ui-viewer__dots" aria-hidden="true"><i></i><i aria-current="true"></i><i></i></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 登录页 ============ -->
+    <section class="spec-section" id="login">
+      <h2 class="spec-section__title">登录页模板</h2>
+      <p class="spec-section__desc">两种布局共用一套结构：宽屏左右双栏（左品牌、右表单），窄屏收起品牌区改为单栏。核心是浮动标签输入框——标签居中显示，聚焦或已有内容时上浮到边框线上并缩小，边框高亮从中心向两侧展开。</p>
+
+      <div class="demo">
+        <div class="demo__label"><span>桌面双栏</span><code>.ui-login</code></div>
+        <div class="demo__body demo__body--plain" style="padding:0;overflow:hidden;border-radius:0">
+          <div class="ui-login" style="min-height:520px">
+            <aside class="ui-login__brand" style="padding:36px 6%">
+              <div class="ui-login__brand-copy">
+                <h2 style="font-size:26px">把日常<br>收进一个地方</h2>
+                <p style="margin-top:12px">记录、整理、回看。所有内容都在你自己的账号里。</p>
+              </div>
+              <p class="ui-login__brand-foot">© 2026</p>
+            </aside>
+            <main class="ui-login__main" style="padding:28px">
+              <div class="ui-login__box">
+                <header class="ui-login__header">
+                  <h3 class="ui-login__title">欢迎回来</h3>
+                  <p>登录后继续上次的进度</p>
+                </header>
+                <form class="ui-login__form">
+                  <label class="ui-float is-filled">
+                    <input class="ui-float__input" type="email" value="hello@example.com" placeholder=" ">
+                    <span class="ui-float__label">邮箱</span>
+                  </label>
+                  <label class="ui-float ui-float--affix">
+                    <input class="ui-float__input" type="password" value="password" placeholder=" ">
+                    <span class="ui-float__label">密码</span>
+                    <button class="ui-float__affix" type="button" aria-label="显示密码">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                  </label>
+                  <div class="ui-login__row">
+                    <label class="ui-choice" style="min-height:auto;padding:0">
+                      <input type="checkbox" checked>
+                      <span class="ui-choice__copy"><strong style="font-size:13px">记住我</strong></span>
+                    </label>
+                    <a class="ui-login__link" href="#login">忘记密码？</a>
+                  </div>
+                  <p class="ui-login__error" role="alert"></p>
+                  <button class="ui-btn ui-btn--primary ui-btn--block ui-btn--lg" type="button">登录</button>
+                </form>
+                <div class="ui-login__divider">或</div>
+                <div class="ui-login__oauth">
+                  <button class="ui-btn ui-btn--block" type="button">使用通行证登录</button>
+                </div>
+                <p class="ui-login__note">还没有账号？<a href="#login">立即注册</a></p>
+              </div>
+            </main>
+          </div>
+        </div>
+      </div>
+
+      <div class="demo">
+        <div class="demo__label"><span>错误态</span><code>.ui-float.is-invalid</code></div>
+        <div class="demo__body demo__body--stack" style="max-width:340px">
+          <label class="ui-float is-invalid is-filled">
+            <input class="ui-float__input" type="email" value="not-an-email" placeholder=" " aria-invalid="true">
+            <span class="ui-float__label">邮箱</span>
+          </label>
+          <p class="ui-login__error" role="alert">请输入有效的邮箱地址</p>
+        </div>
+      </div>
+
+      <div class="spec-tip"><strong>浮动标签的实现：</strong>靠 <code>:focus-within</code> 与 <code>:not(:placeholder-shown)</code> 判断是否上浮，不需要 JS。输入框必须有 <code>placeholder=" "</code>（一个空格），否则选择器失效。</div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ============ 对话框实例 ============ -->
+<dialog class="ui-dialog" id="dlg-basic" aria-labelledby="dlg-basic-title">
+  <h2 class="ui-dialog__title" id="dlg-basic-title">保存这次修改？</h2>
+  <p class="ui-dialog__body">保存后会立即生效，并同步到所有已登录的设备。</p>
+  <div class="ui-dialog__actions">
+    <button class="ui-btn" data-close>取消</button>
+    <button class="ui-btn ui-btn--primary" data-close>保存</button>
+  </div>
+</dialog>
+
+<dialog class="ui-dialog" id="dlg-danger" aria-labelledby="dlg-danger-title">
+  <h2 class="ui-dialog__title" id="dlg-danger-title">删除这条记录？</h2>
+  <p class="ui-dialog__body">删除后无法恢复，与它关联的附件也会一并移除。</p>
+  <div class="ui-dialog__actions">
+    <button class="ui-btn" data-close autofocus>取消</button>
+    <button class="ui-btn ui-btn--danger" data-close>删除</button>
+  </div>
+</dialog>
+
+<!-- ============ 底部面板实例 ============ -->
+<div class="ui-sheet-backdrop" id="sheet-actions-backdrop" hidden data-close-sheet></div>
+<div class="ui-sheet" id="sheet-actions" role="dialog" aria-modal="true" aria-labelledby="sheet-actions-title" hidden>
+  <div class="ui-sheet__grabber" aria-hidden="true"></div>
+  <h2 class="ui-sheet__title" id="sheet-actions-title">选择操作</h2>
+  <div class="ui-sheet__body">
+    <ul class="ui-actions">
+      <li><button class="ui-actions__item">复制链接</button></li>
+      <li><button class="ui-actions__item">保存到本地</button></li>
+      <li><button class="ui-actions__item">分享给朋友</button></li>
+      <li><button class="ui-actions__item ui-actions__item--danger">举报内容</button></li>
+    </ul>
+    <button class="ui-actions__item ui-actions__cancel" data-close-sheet>取消</button>
+  </div>
+</div>
+
+<!-- ============ 轻提示容器 ============ -->
+<div class="ui-toast-region" id="toast-region" aria-live="polite"></div>
+
+<script type="module">
+  import { createDialog, createSheet, createToaster, createSegmented, createSelect } from './behaviors/index.js';
+
+  // —— 主题 ——
+  const html = document.documentElement;
+  const systemTheme = matchMedia('(prefers-color-scheme: dark)');
+  let themeMode = 'auto';
+  const themeButtons = [...document.querySelectorAll('[data-theme-btn]')];
+  const paletteSwatches = [...document.querySelectorAll('.swatch')].flatMap((swatch) => {
+    const value = swatch.querySelector('.swatch__value');
+    const token = swatch.querySelector('.swatch__chip')?.style.background.match(/var\((--[\w-]+)\)/)?.[1];
+    return value?.textContent.startsWith('#') && token ? [{ value, token }] : [];
+  });
+  const applyTheme = (theme) => {
+    themeMode = theme;
+    html.dataset.theme = theme === 'auto' ? (systemTheme.matches ? 'dark' : 'light') : theme;
+    themeButtons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.themeBtn === themeMode)));
+    const styles = getComputedStyle(html);
+    paletteSwatches.forEach(({ value, token }) => { value.textContent = styles.getPropertyValue(token).trim(); });
+  };
+  themeButtons.forEach((b) => b.addEventListener('click', () => applyTheme(b.dataset.themeBtn)));
+  // 支持 ?theme=dark|light 直接指定，便于截图与嵌入预览
+  const forced = new URLSearchParams(location.search).get('theme');
+  applyTheme(forced === 'dark' || forced === 'light'
+    ? forced
+    : 'auto');
+  systemTheme.addEventListener('change', () => { if (themeMode === 'auto') applyTheme('auto'); });
+
+  const directory = document.querySelector('.spec-directory');
+  const narrow = matchMedia('(max-width: 860px)');
+  const updateDirectory = () => { directory.open = !narrow.matches; };
+  updateDirectory();
+  narrow.addEventListener('change', updateDirectory);
+  directory.addEventListener('click', (event) => {
+    const link = event.target.closest('a[href^="#"]');
+    if (!link || !narrow.matches) return;
+    directory.open = false;
+    const target = document.querySelector(link.getAttribute('href'));
+    target?.setAttribute('tabindex', '-1');
+    target?.focus({ preventScroll: true });
+  });
+
+  // —— 对话框：焦点归还、遮罩关闭、[data-close] 都由模块处理 ——
+  const dialogs = new Map();
+  document.querySelectorAll('dialog.ui-dialog').forEach((el) => {
+    dialogs.set(el.id, createDialog(el));
+  });
+  document.querySelectorAll('[data-open]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const dialog = dialogs.get(btn.dataset.open);
+      if (dialog) dialog.open(btn);
+    });
+  });
+
+  // —— 底部面板：滚动锁定、焦点陷阱、Esc、拖拽关闭 ——
+  const sheet = createSheet(document.getElementById('sheet-actions'), {
+    backdrop: document.getElementById('sheet-actions-backdrop'),
+  });
+  document.querySelectorAll('[data-open="sheet-actions"]').forEach((btn) => {
+    btn.addEventListener('click', () => sheet.open(btn));
+  });
+
+  // —— 轻提示：单实例替换、自动离场、role 随类型切换 ——
+  const toast = createToaster(document.getElementById('toast-region'));
+  const ICONS = {
+    success: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg>',
+    error: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>',
+    plain: '',
+  };
+  const TEXT = { success: '已保存', error: '请求失败，请稍后重试', plain: '已复制到剪贴板' };
+  document.querySelectorAll('[data-toast]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const kind = btn.dataset.toast;
+      toast.show(TEXT[kind], { type: kind, icon: ICONS[kind] });
+    });
+  });
+
+  // —— 分段控件与标签栏：方向键切换 + roving tabindex ——
+  document.querySelectorAll('.ui-seg, .ui-tabs').forEach((el) => createSegmented(el));
+
+  // —— 自定义下拉：键盘操作 + 点击外部关闭 + 空间不足向上展开 ——
+  const selectDemo = document.getElementById('demo-select');
+  if (selectDemo) createSelect(selectDemo);
+</script>
+</body>
+</html>

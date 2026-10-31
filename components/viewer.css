@@ -1,0 +1,90 @@
+/* ============================================================
+   Viewer — 全屏图片查看器
+   ------------------------------------------------------------
+   结构
+   <div class="ui-viewer" role="dialog" aria-modal="true" aria-label="图片预览">
+     <button class="ui-viewer__close" aria-label="关闭">×</button>
+     <div class="ui-viewer__stage">
+       <img src="…" alt="">
+     </div>
+     <div class="ui-viewer__counter">2 / 5</div>
+     <div class="ui-viewer__dots">…</div>
+   </div>
+
+   规则
+   - 背景纯黑，图片 contain 不裁切
+   - 单击任意处关闭，双击放大到 2 倍
+   - 多图时左右滑动切换，底部显示页码
+   - 关闭后焦点回到触发缩略图
+   ============================================================ */
+
+.ui-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  background: #000;
+  color: #fff;
+  animation: ui-fade-in var(--dur-normal) var(--ease-out);
+}
+
+.ui-viewer[hidden] { display: none; }
+
+.ui-viewer__close {
+  position: absolute;
+  top: calc(var(--sp-3) + var(--safe-top));
+  right: var(--sp-3);
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .14);
+  color: #fff;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.ui-viewer__stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.ui-viewer__stage img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  transition: transform var(--dur-normal) var(--ease-out);
+}
+
+.ui-viewer__stage img.is-zoomed { transform: scale(2); cursor: zoom-out; }
+
+.ui-viewer__counter {
+  padding: var(--sp-3);
+  padding-bottom: calc(var(--sp-5) + var(--safe-bottom));
+  text-align: center;
+  font-size: var(--fs-meta);
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, .72);
+}
+
+.ui-viewer__dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding-bottom: calc(var(--sp-4) + var(--safe-bottom));
+}
+.ui-viewer__dots i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .3);
+}
+.ui-viewer__dots i[aria-current='true'] { background: #fff; }

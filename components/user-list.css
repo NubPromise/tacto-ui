@@ -1,0 +1,164 @@
+/* ============================================================
+   UserList — 用户行
+   ------------------------------------------------------------
+   关注列表、粉丝列表、群成员、@ 提及共用同一行结构。
+
+   结构
+   <div class="ui-user-list">
+     <a class="ui-user-row" href="…">
+       <span class="ui-avatar ui-avatar--md">…</span>
+       <span class="ui-user-row__main">
+         <span class="ui-user-row__name">名字</span>
+         <span class="ui-user-row__meta">12 关注 · 34 粉丝</span>
+       </span>
+       <span class="ui-user-row__action">…</span>
+     </a>
+   </div>
+
+   规则
+   - 行高 ≥ 64px，头像 48px
+   - 尾部只能有一个操作，避免误触
+   ============================================================ */
+
+.ui-user-list {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-card);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+
+.ui-user-list--plain {
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.ui-user-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 64px;
+  padding: var(--sp-3) var(--card-pad);
+  color: inherit;
+  text-decoration: none;
+  transition: background-color var(--dur-fast) var(--ease);
+}
+
+.ui-user-list .ui-user-row + .ui-user-row { border-top: 1px solid var(--border); }
+.ui-user-row:hover, .ui-user-row:active { background: var(--bg-card-soft); }
+
+.ui-user-row__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.ui-user-row__name {
+  display: block;
+  font-size: 14.5px;
+  font-weight: var(--fw-semibold);
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ui-user-row__meta {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--fs-meta);
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ui-user-row__action {
+  flex-shrink: 0;
+  color: var(--text-tertiary);
+}
+
+.ui-user-row--muted .ui-user-row__name { color: var(--text-secondary); }
+
+/* —— 通知行：图标 + 文本 + 时间 + 未读点 —— */
+.ui-notice {
+  display: flex;
+  gap: var(--sp-3);
+  padding: 15px var(--card-pad);
+  border-bottom: 1px solid var(--border);
+}
+.ui-notice:last-child { border-bottom: 0; }
+
+.ui-notice__icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 14px;
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+}
+
+.ui-notice__content { flex: 1; min-width: 0; }
+.ui-notice__text { font-size: 13.5px; line-height: 1.5; color: var(--text-primary); }
+.ui-notice__time { margin-top: var(--sp-1); font-size: 11px; color: var(--text-tertiary); }
+
+.ui-notice__dot {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  margin-top: 6px;
+  border-radius: 50%;
+  background: var(--error);
+}
+
+/* —— 可左滑的会话行：动作层在滑动展开时才出现 —— */
+.ui-swipe {
+  position: relative;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+
+.ui-swipe__actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .18s ease;
+}
+
+.ui-swipe.is-open .ui-swipe__actions { opacity: 1; pointer-events: auto; }
+
+.ui-swipe__action {
+  width: 64px;
+  border: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-body-small);
+  font-weight: var(--fw-bold);
+  letter-spacing: .02em;
+  color: #fff;
+}
+.ui-swipe__action--pin { background: var(--action-bg); }
+.ui-swipe__action--del { background: var(--error-fill); }
+
+.ui-swipe__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: 12px 14px;
+  background: var(--bg-card);
+  border-radius: var(--r-lg);
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  will-change: transform;
+}

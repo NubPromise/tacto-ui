@@ -1,0 +1,114 @@
+/* ============================================================
+   State — 空 / 错误 / 加载状态
+   ------------------------------------------------------------
+   三种状态共用一套骨架：图标 / 标题 / 说明 / 一个操作。
+   文案写「能做什么」，不写「暂无数据」。
+
+   结构
+   <div class="ui-state ui-state--error">
+     <span class="ui-state__icon">…</span>
+     <p class="ui-state__title">加载失败</p>
+     <p class="ui-state__desc">网络似乎不太稳定，请重试。</p>
+     <button class="ui-btn ui-btn--primary ui-btn--sm">重试</button>
+   </div>
+
+   变体：--empty（默认）/ --error / --loading
+   ============================================================ */
+
+.ui-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+  padding: 52px var(--sp-6);
+  text-align: center;
+}
+
+.ui-state__icon {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 22px;
+  background: var(--bg-card-soft);
+  color: var(--text-tertiary);
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+.ui-state__icon svg { width: 28px; height: 28px; }
+
+.ui-state--error .ui-state__icon {
+  background: var(--error-soft);
+  color: var(--error);
+  box-shadow: none;
+}
+
+.ui-state__title {
+  font-family: var(--font-ui);
+  font-size: var(--fs-card-title);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-tight);
+  color: var(--text-primary);
+}
+
+.ui-state__desc {
+  max-width: 26ch;
+  font-size: var(--fs-body-small);
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.ui-state__actions {
+  display: flex;
+  gap: var(--sp-2);
+  margin-top: var(--sp-1);
+}
+
+/* —— 加载态：图标换成旋转环，不占位跳动 —— */
+.ui-state--loading .ui-state__icon {
+  background: transparent;
+  box-shadow: none;
+}
+
+.ui-spinner {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2.5px solid var(--border);
+  border-top-color: var(--accent);
+  animation: ui-spin .7s linear infinite;
+}
+
+@keyframes ui-spin { to { transform: rotate(360deg); } }
+
+.ui-state--loading .ui-state__title { font-weight: var(--fw-medium); color: var(--text-secondary); }
+
+/* —— 行内加载：列表底部「加载更多」 —— */
+.ui-loadmore {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  padding: var(--sp-4) 0 var(--sp-5);
+  font-size: var(--fs-meta);
+  color: var(--text-tertiary);
+}
+
+.ui-loadmore .ui-spinner { width: 14px; height: 14px; border-width: 2px; }
+
+/* —— 首屏骨架：形状必须与真实内容一致 —— */
+.ui-skeleton-card {
+  display: flex;
+  gap: var(--sp-3);
+  padding: var(--card-pad);
+  border-radius: var(--r-lg);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-card);
+}
+
+.ui-skeleton-card__body {
+  display: grid;
+  gap: var(--sp-2);
+  flex: 1;
+  align-content: start;
+}

@@ -1,0 +1,67 @@
+/* ============================================================
+   Refresh — 下拉刷新
+   ------------------------------------------------------------
+   结构
+   <div class="ui-refresh" data-state="idle">
+     <span class="ui-refresh__indicator">↓</span>
+     <span class="ui-refresh__text">下拉刷新</span>
+   </div>
+
+   data-state 四态：idle → pulling → ready → loading
+     idle     隐藏，箭头朝下
+     pulling  跟随手指，箭头随下拉角度旋转
+     ready    越过阈值，文案变「松手刷新」，箭头翻转
+     loading  转成旋转环
+
+   规则
+   - 阈值 64px，超过后给触感反馈（设备支持时）
+   - 刷新过程中高度固定，避免内容跳动
+   - 手势只在页面滚动到顶部时接管
+   ============================================================ */
+
+.ui-refresh {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  height: 0;
+  overflow: hidden;
+  font-size: var(--fs-meta);
+  color: var(--text-tertiary);
+  transition: height var(--dur-normal) var(--ease-out);
+}
+
+.ui-refresh[data-state='pulling'],
+.ui-refresh[data-state='ready'],
+.ui-refresh[data-state='loading'] {
+  height: 52px;
+}
+
+.ui-refresh__indicator {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+.ui-refresh[data-state='ready'] .ui-refresh__indicator { transform: rotate(180deg); }
+
+.ui-refresh[data-state='loading'] .ui-refresh__indicator {
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  animation: ui-refresh-spin .7s linear infinite;
+}
+.ui-refresh[data-state='loading'] .ui-refresh__indicator svg { display: none; }
+
+@keyframes ui-refresh-spin { to { transform: rotate(360deg); } }
+
+.ui-refresh__text { letter-spacing: .01em; }
+
+/* —— 下拉时内容跟随下移（由 JS 设置 --pull 变量） —— */
+.ui-refresh-content {
+  transform: translateY(calc(var(--pull, 0px) * .5));
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.ui-refresh-content.is-releasing { transition: transform var(--dur-normal) var(--ease-out); }

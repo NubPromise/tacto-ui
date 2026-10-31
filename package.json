@@ -1,0 +1,29 @@
+{
+  "name": "tacto-ui",
+  "version": "1.0.0",
+  "description": "轻量移动 Web UI 工具箱：原生 CSS 与 ES Modules，零构建、令牌驱动",
+  "type": "module",
+  "license": "MIT",
+  "files": [
+    "tokens/",
+    "components/",
+    "pages/",
+    "behaviors/",
+    "docs/",
+    "index.html",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "dev": "node scripts/serve.mjs",
+    "check": "node scripts/check.mjs"
+  },
+  "keywords": [
+    "design-system",
+    "css",
+    "components",
+    "mobile",
+    "design-tokens",
+    "accessibility"
+  ]
+}

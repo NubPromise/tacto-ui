@@ -1,0 +1,311 @@
+/* ============================================================
+   Login — 登录页模板
+   ------------------------------------------------------------
+   两种布局，一套结构：
+     ≥900px  左右双栏：左侧品牌叙述，右侧表单
+     <900px  单栏：品牌区收起，表单居中
+
+   结构
+   <div class="ui-login">
+     <aside class="ui-login__brand">
+       <div class="ui-login__brand-copy">
+         <h2>…</h2><p>…</p>
+       </div>
+       <p class="ui-login__brand-foot">…</p>
+     </aside>
+     <main class="ui-login__main">
+       <div class="ui-login__box">
+         <header class="ui-login__header"><h1>欢迎回来</h1><p>…</p></header>
+         <form class="ui-login__form">
+           <label class="ui-float">
+             <input class="ui-float__input" placeholder=" ">
+             <span class="ui-float__label">邮箱</span>
+           </label>
+           <p class="ui-login__error" role="alert"></p>
+           <button class="ui-btn ui-btn--primary ui-btn--block ui-btn--lg">登录</button>
+         </form>
+         <p class="ui-login__note">…</p>
+       </div>
+     </main>
+   </div>
+
+   规则
+   - 输入框 52px 高，浮动标签不用 placeholder 代替
+   - 聚焦时边框从中心向两侧展开，暗示「当前正在编辑」
+   - 错误提示在按钮上方，用 role="alert"
+   ============================================================ */
+
+.ui-login {
+  display: grid;
+  grid-template-columns: minmax(320px, 1fr) minmax(400px, 1fr);
+  min-height: 100dvh;
+  background: var(--bg-page);
+}
+
+/* —— 左侧品牌叙述：只在宽屏出现 —— */
+.ui-login__brand {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 56px 8%;
+  background:
+    radial-gradient(100% 60% at 90% 0%, rgba(82, 160, 240, .18), transparent 70%),
+    radial-gradient(80% 50% at 0% 100%, rgba(119, 88, 244, .12), transparent 70%),
+    var(--accent-soft);
+}
+
+.ui-login__brand-copy h2 {
+  max-width: 11em;
+  font-family: var(--font-ui);
+  font-size: 36px;
+  font-weight: var(--fw-bold);
+  line-height: 1.45;
+  letter-spacing: var(--ls-tighter);
+  color: var(--text-primary);
+}
+
+.ui-login__brand-copy p {
+  max-width: 30ch;
+  margin-top: var(--sp-4);
+  font-size: var(--fs-body);
+  line-height: 1.75;
+  color: var(--text-secondary);
+}
+
+.ui-login__brand-foot {
+  font-size: var(--fs-meta);
+  color: var(--text-tertiary);
+}
+
+/* —— 右侧表单区 —— */
+.ui-login__main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-6);
+}
+
+.ui-login__box {
+  width: 100%;
+  max-width: 380px;
+}
+
+.ui-login__header { text-align: center; }
+
+.ui-login__title,
+.ui-login__header h1 {
+  font-family: var(--font-ui);
+  font-size: 26px;
+  font-weight: var(--fw-bold);
+  line-height: 1.35;
+  letter-spacing: var(--ls-tight);
+  color: var(--text-primary);
+}
+
+.ui-login__header p {
+  margin-top: var(--sp-2);
+  font-size: var(--fs-body-small);
+  color: var(--text-secondary);
+}
+
+/* —— 表单 —— */
+.ui-login__form {
+  display: grid;
+  gap: var(--sp-5);
+  margin-top: var(--sp-6);
+}
+
+.ui-login__error {
+  min-height: 20px;
+  margin: 0;
+  text-align: center;
+  font-size: var(--fs-body-small);
+  color: var(--error);
+  transition: opacity var(--dur-normal) var(--ease-out);
+}
+.ui-login__error:empty { opacity: 0; }
+
+/* ============================================================
+   浮动标签输入框
+   ------------------------------------------------------------
+   标签居中显示，聚焦或已有内容时上浮到边框线上并缩小。
+   边框高亮用 clip-path 从中心向两侧展开。
+   ============================================================ */
+
+.ui-float {
+  --float-height: 52px;
+  position: relative;
+  display: block;
+  height: var(--float-height);
+  border: 1px solid rgba(var(--ink-rgb) / .22);
+  border-radius: var(--r-sm);
+  background: var(--bg-card);
+  transition: border-color var(--dur-normal) var(--ease-out);
+}
+
+.ui-float__input {
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0 14px;
+  border: 0;
+  border-radius: inherit;
+  outline: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 16px;   /* 不小于 16px：iOS 聚焦不放大 */
+  font-weight: var(--fw-regular);
+  caret-color: var(--accent);
+}
+
+.ui-float__label {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 10px;
+  max-width: calc(100% - 24px);
+  padding: 0 4px;
+  color: var(--text-secondary);
+  font-size: 16px;
+  line-height: 1.5;
+  white-space: nowrap;
+  cursor: text;
+  transform: translateY(-50%);
+  transform-origin: left center;
+  transition: transform var(--dur-normal) var(--ease-out),
+              color var(--dur-normal) var(--ease-out),
+              background-color var(--dur-normal) var(--ease-out);
+}
+
+/* 聚焦或已填内容时上浮 */
+.ui-float:focus-within .ui-float__label,
+.ui-float.is-filled .ui-float__label,
+.ui-float__input:not(:placeholder-shown) + .ui-float__label {
+  background: var(--bg-card);
+  transform: translateY(calc(-50% - var(--float-height) / 2)) scale(.8);
+}
+
+.ui-float:focus-within .ui-float__label { color: var(--accent); }
+
+/* 从中心展开的高亮边框 */
+.ui-float::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  z-index: 1;
+  border: 2px solid var(--accent);
+  border-radius: inherit;
+  pointer-events: none;
+  clip-path: inset(0 50% 0 50%);
+  transition: clip-path var(--dur-normal) var(--ease-out),
+              border-color var(--dur-normal) var(--ease-out);
+}
+
+.ui-float:focus-within::after { clip-path: inset(0 0 0 0); }
+
+/* 错误态 */
+.ui-float.is-invalid { border-color: var(--error); }
+.ui-float.is-invalid::after { border-color: var(--error); }
+.ui-float.is-invalid .ui-float__label { color: var(--error); }
+
+/* 尾部按钮（显示密码） */
+.ui-float--affix .ui-float__input { padding-right: 52px; }
+.ui-float__affix {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--text-tertiary);
+  transform: translateY(-50%);
+}
+.ui-float__affix:hover { color: var(--accent); }
+
+/* —— 辅助行：记住我 / 忘记密码 —— */
+.ui-login__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  font-size: var(--fs-body-small);
+}
+
+.ui-login__link {
+  color: var(--accent);
+  font-weight: var(--fw-medium);
+}
+
+/* —— 第三方登录 —— */
+.ui-login__oauth {
+  display: grid;
+  gap: var(--sp-2);
+  margin-top: var(--sp-5);
+}
+
+.ui-login__divider {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin: var(--sp-5) 0;
+  font-size: var(--fs-meta);
+  color: var(--text-tertiary);
+}
+.ui-login__divider::before,
+.ui-login__divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.ui-login__note {
+  margin-top: var(--sp-6);
+  text-align: center;
+  font-size: var(--fs-meta);
+  line-height: 1.6;
+  color: var(--text-tertiary);
+}
+
+.ui-login__note a { color: var(--accent); }
+
+/* ============================================================
+   移动端：单栏
+   ============================================================ */
+@media (max-width: 900px) {
+  .ui-login { display: block; }
+
+  .ui-login__brand {
+    display: block;
+    padding: calc(var(--sp-6) + var(--safe-top)) var(--sp-6) var(--sp-4);
+    border-radius: 0 0 var(--r-2xl) var(--r-2xl);
+    background:
+      radial-gradient(120% 80% at 90% 0%, rgba(82, 160, 240, .2), transparent 70%),
+      var(--accent-soft);
+  }
+
+  .ui-login__brand-copy h2 {
+    max-width: none;
+    font-size: 24px;
+    line-height: 1.4;
+  }
+  .ui-login__brand-copy p { display: none; }
+  .ui-login__brand-foot { display: none; }
+
+  .ui-login__main {
+    align-items: flex-start;
+    padding: var(--sp-6) var(--sp-5) calc(var(--sp-8) + var(--safe-bottom));
+  }
+
+  .ui-login__box { max-width: 480px; }
+  .ui-login__header { text-align: left; }
+  .ui-login__title,
+  .ui-login__header h1 { font-size: 22px; }
+}

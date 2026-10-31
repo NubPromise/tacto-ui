@@ -1,0 +1,150 @@
+/* ============================================================
+   Card — 卡片与面板
+   ------------------------------------------------------------
+   变体：默认（实色）/ --soft / --glass / --flat / --pressable
+   结构
+   <section class="ui-card">
+     <header class="ui-card__head">
+       <h3 class="ui-card__title">标题</h3>
+       <span class="ui-card__extra">辅助</span>
+     </header>
+     <div class="ui-card__body">…</div>
+     <footer class="ui-card__foot">…</footer>
+   </section>
+
+   规则
+   - 内容区用实色，玻璃只给控制层（导航 / 悬浮 / 弹层）
+   - 卡片之间用间距分隔，不叠阴影做层级
+   - 可点击的卡片用 --pressable，整块是 <a> 或 <button>
+   ============================================================ */
+
+.ui-card {
+  display: block;
+  padding: var(--card-pad);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-card);
+  color: inherit;
+  text-decoration: none;
+}
+
+.ui-card--soft {
+  background: var(--bg-card-soft);
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.ui-card--glass {
+  background: var(--glass-bg);
+  border: var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+
+.ui-card--flat {
+  box-shadow: none;
+}
+
+.ui-card--lg { padding: var(--card-pad-lg); border-radius: var(--r-xl); }
+.ui-card--sm { padding: var(--card-pad-sm); border-radius: var(--r-md); }
+
+/* —— 可点击卡片 —— */
+.ui-card--pressable {
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease),
+              box-shadow var(--dur-fast) var(--ease);
+}
+.ui-card--pressable:hover { box-shadow: var(--shadow-card-hover); }
+.ui-card--pressable:active { transform: scale(.985); }
+
+/* —— 强调卡片：左侧色条，用于提示 / 状态 —— */
+.ui-card--accent {
+  border-left: 3px solid var(--accent);
+  padding-left: calc(var(--card-pad) - 3px);
+}
+
+/* —— 卡片内部结构 —— */
+.ui-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-3);
+}
+
+.ui-card__title {
+  font-family: var(--font-ui);
+  font-size: var(--fs-card-title);
+  font-weight: var(--fw-semibold);
+  line-height: 1.45;
+  color: var(--text-primary);
+}
+
+.ui-card__extra {
+  flex-shrink: 0;
+  font-size: var(--fs-meta);
+  color: var(--text-tertiary);
+}
+
+.ui-card__body { font-size: var(--fs-body); color: var(--text-secondary); }
+
+.ui-card__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  margin-top: var(--sp-4);
+  padding-top: var(--sp-3);
+  border-top: 1px solid var(--border);
+  font-size: var(--fs-meta);
+  color: var(--text-secondary);
+}
+
+/* —— 指标块：数字优先的展示卡 —— */
+.ui-metric { display: grid; gap: var(--sp-1); }
+.ui-metric__value {
+  font-family: var(--font-ui);
+  font-size: 32px;
+  font-weight: var(--fw-semibold);
+  line-height: 1.15;
+  letter-spacing: var(--ls-tighter);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+.ui-metric__label { font-size: var(--fs-meta); color: var(--text-secondary); }
+
+/* —— 进度条 —— */
+.ui-progress {
+  height: 8px;
+  border-radius: var(--r-pill);
+  background: var(--bg-card-soft);
+  overflow: hidden;
+}
+.ui-progress__bar {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+  transition: width var(--dur-slow) var(--ease-out);
+}
+.ui-progress--success .ui-progress__bar { background: var(--success); }
+.ui-progress--warning .ui-progress__bar { background: var(--warning); }
+.ui-progress--error .ui-progress__bar { background: var(--error); }
+
+/* —— 提示条（Alert） —— */
+.ui-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-md);
+  background: var(--accent-soft);
+  color: var(--text-primary);
+  font-size: var(--fs-body-small);
+  line-height: 1.6;
+}
+.ui-alert--success { background: var(--success-soft); }
+.ui-alert--warning { background: var(--warning-soft); }
+.ui-alert--error { background: var(--error-soft); }
+.ui-alert__title { font-weight: var(--fw-semibold); }

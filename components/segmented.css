@@ -1,0 +1,86 @@
+/* ============================================================
+   Segmented — 分段控件
+   ------------------------------------------------------------
+   结构
+   <div class="ui-seg" role="tablist">
+     <button class="ui-seg__item" role="tab" aria-selected="true">…</button>
+     <button class="ui-seg__item" role="tab" aria-selected="false">…</button>
+   </div>
+
+   规则
+   - 2–5 段；超过 5 段改用横向滚动的标签栏
+   - 选中态用滑块位移，不用下划线
+   - 用 role="tablist" / aria-selected，键盘左右键可切换
+   ============================================================ */
+
+.ui-seg {
+  position: relative;
+  display: flex;
+  padding: 3px;
+  border-radius: var(--r-md);
+  background: var(--bg-card-soft);
+  overflow: hidden;
+}
+
+.ui-seg__item {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-width: 0;
+  min-height: 38px;
+  padding: var(--sp-2) var(--sp-3);
+  border: 0;
+  border-radius: calc(var(--r-md) - 3px);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-ui);
+  font-size: var(--fs-body-small);
+  font-weight: var(--fw-medium);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  transition: color var(--dur-fast) var(--ease);
+}
+
+.ui-seg__item[aria-selected='true'] {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-soft);
+}
+
+.ui-seg__item:not([aria-selected='true']):hover { color: var(--text-primary); }
+
+/* —— 紧凑版 —— */
+.ui-seg--sm .ui-seg__item { min-height: 30px; font-size: var(--fs-meta); }
+
+/* —— 可滚动的标签栏：段数多时使用 —— */
+.ui-tabs {
+  display: flex;
+  gap: var(--sp-4);
+  padding: 0 var(--page-h);
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 1px solid var(--border);
+}
+.ui-tabs::-webkit-scrollbar { display: none; }
+
+.ui-tabs__item {
+  flex-shrink: 0;
+  padding: var(--sp-3) 0;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-ui);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-medium);
+  white-space: nowrap;
+  transition: color var(--dur-fast) var(--ease),
+              border-color var(--dur-fast) var(--ease);
+}
+
+.ui-tabs__item[aria-selected='true'],
+.ui-tabs__item[aria-current='page'] {
+  color: var(--text-primary);
+  border-bottom-color: var(--accent);
+}

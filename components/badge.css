@@ -1,0 +1,65 @@
+/* ============================================================
+   Badge — 徽标与状态标签
+   ------------------------------------------------------------
+   变体：默认（中性）/ --accent / --success / --warning / --error
+   尺寸：默认 / --sm / --dot（纯圆点）
+
+   规则
+   - 文字必须自带语义，不只用颜色区分状态
+   - 圆角用 pill，高度固定，不随内容变化
+   ============================================================ */
+
+.ui-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: var(--r-pill);
+  background: var(--bg-card-soft);
+  color: var(--text-secondary);
+  font-family: var(--font-ui);
+  font-size: var(--fs-meta);
+  font-weight: var(--fw-medium);
+  line-height: 1.6;
+  white-space: nowrap;
+}
+
+.ui-badge--accent { background: var(--accent-soft); color: var(--accent-deep); }
+.ui-badge--success { background: var(--success-soft); color: var(--success); }
+.ui-badge--warning { background: var(--warning-soft); color: var(--warning); }
+.ui-badge--error { background: var(--error-soft); color: var(--error); }
+
+.ui-badge--outline {
+  background: transparent;
+  border: 1px solid currentColor;
+}
+
+.ui-badge--sm { padding: 1px 8px; font-size: 11px; }
+
+/* —— 纯圆点状态 —— */
+.ui-badge--dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--text-tertiary);
+}
+.ui-badge--dot.ui-badge--success { background: var(--success); }
+.ui-badge--dot.ui-badge--warning { background: var(--warning); }
+.ui-badge--dot.ui-badge--error { background: var(--error); }
+
+/* —— 计数角标：挂在图标 / 头像右上角 —— */
+.ui-badge-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--r-pill);
+  background: var(--error-fill);
+  color: #fff;
+  font-size: 11px;
+  font-weight: var(--fw-semibold);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}

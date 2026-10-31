@@ -1,0 +1,85 @@
+/* ============================================================
+   Toast — 轻提示
+   ------------------------------------------------------------
+   结构
+   <div class="ui-toast ui-toast--success" role="status">
+     <span class="ui-toast__icon">…</span>
+     <span class="ui-toast__text">已保存</span>
+   </div>
+
+   规则
+   - 只承载「已发生」的反馈，不承载需要决策的信息
+   - 停留 2.4s，最多同时一个；新提示替换旧提示而不是排队
+   - 用 role="status"（礼貌播报），错误用 role="alert"
+   ============================================================ */
+
+.ui-toast-region {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--dock-h) + var(--sp-6) + var(--safe-bottom));
+  z-index: var(--z-toast);
+  display: grid;
+  justify-items: center;
+  gap: var(--sp-2);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.ui-toast {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  max-width: calc(100vw - 48px);
+  padding: var(--sp-3) var(--sp-5);
+  border-radius: var(--r-pill);
+  background: rgba(20, 24, 35, .92);
+  color: #fff;
+  font-size: var(--fs-body-small);
+  font-weight: var(--fw-medium);
+  line-height: 1.4;
+  box-shadow: 0 12px 32px rgba(18, 26, 40, .28);
+  animation: ui-toast-in var(--dur-normal) var(--ease-spring);
+}
+
+.ui-toast[hidden] { display: none; }
+
+@keyframes ui-toast-in {
+  from { opacity: 0; transform: translateY(10px) scale(.96); }
+  to { opacity: 1; transform: none; }
+}
+
+.ui-toast.is-leaving {
+  animation: ui-toast-out var(--dur-fast) var(--ease) forwards;
+}
+@keyframes ui-toast-out {
+  to { opacity: 0; transform: translateY(6px) scale(.98); }
+}
+
+.ui-toast__icon { width: 18px; height: 18px; flex-shrink: 0; }
+.ui-toast--success .ui-toast__icon { color: var(--on-dark-success); }
+.ui-toast--error .ui-toast__icon { color: var(--on-dark-error); }
+
+/* —— 顶部横幅式提示：需要用户注意但不打断 —— */
+.ui-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-md);
+  background: var(--glass-surface-bg);
+  box-shadow: var(--glass-surface-shadow);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  font-size: var(--fs-body-small);
+  animation: ui-toast-in var(--dur-normal) var(--ease-out);
+}
+.ui-banner__close {
+  margin-left: auto;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}

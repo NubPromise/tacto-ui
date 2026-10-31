@@ -1,0 +1,146 @@
+/* ============================================================
+   Banner — 横幅与轮播
+   ------------------------------------------------------------
+   结构
+   <div class="ui-carousel" data-carousel>
+     <div class="ui-carousel__track">
+       <a class="ui-banner">…</a>
+       <a class="ui-banner">…</a>
+     </div>
+     <div class="ui-carousel__dots"><i aria-current="true"></i><i></i></div>
+   </div>
+
+   规则
+   - 高度 120–160px，圆角 20px，图文叠加时必须有遮罩保证对比度
+   - 轮播用 CSS scroll-snap，不写自动播放（省电，也不打断阅读）
+   - 指示点最多 5 个，多了改成进度条
+   ============================================================ */
+
+.ui-carousel {
+  position: relative;
+  margin: 0 calc(var(--page-h) * -1);
+  padding: 0 var(--page-h);
+}
+
+.ui-carousel__track {
+  display: flex;
+  gap: var(--sp-3);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+.ui-carousel__track::-webkit-scrollbar { display: none; }
+
+.ui-banner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  flex: 0 0 100%;
+  min-height: 132px;
+  padding: var(--sp-4);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  scroll-snap-align: center;
+  background: linear-gradient(135deg, var(--blue), var(--violet));
+  color: #fff;
+  text-decoration: none;
+}
+
+.ui-banner--soft {
+  background: var(--accent-soft);
+  color: var(--text-primary);
+}
+
+.ui-banner__art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.ui-banner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(10, 16, 30, 0) 30%, rgba(10, 16, 30, .55));
+}
+
+.ui-banner--soft::after { display: none; }
+
+.ui-banner__copy {
+  position: relative;
+  z-index: 2;
+  display: block;
+  max-width: 80%;
+  text-align: left;
+}
+
+.ui-banner__title {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: var(--fs-title-section);
+  font-weight: var(--fw-bold);
+  line-height: 1.35;
+  letter-spacing: var(--ls-tight);
+}
+
+.ui-banner__desc {
+  display: block;
+  margin-top: var(--sp-1);
+  font-size: var(--fs-body-small);
+  line-height: 1.5;
+  opacity: .88;
+}
+
+.ui-banner__cta {
+  align-self: flex-start;
+  margin-top: var(--sp-3);
+  padding: 8px 16px;
+  border-radius: var(--r-pill);
+  background: var(--bg-card);
+  color: var(--accent-deep);
+  font-size: var(--fs-meta);
+  font-weight: var(--fw-semibold);
+}
+
+/* —— 指示点 —— */
+.ui-carousel__dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: var(--sp-3);
+}
+
+.ui-carousel__dots i {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--r-pill);
+  background: rgba(var(--ink-rgb) / .2);
+  transition: width var(--dur-normal) var(--ease-out),
+              background-color var(--dur-normal) var(--ease-out);
+}
+
+.ui-carousel__dots i[aria-current='true'] {
+  width: 18px;
+  background: var(--accent);
+}
+
+/* —— 通知横幅：页面顶部的单行提示 —— */
+.ui-tipbar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-4);
+  border-radius: var(--r-pill);
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+  font-size: var(--fs-meta);
+  font-weight: var(--fw-medium);
+}
+.ui-tipbar svg { width: 16px; height: 16px; flex-shrink: 0; }

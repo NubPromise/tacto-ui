@@ -1,0 +1,59 @@
+/* ============================================================
+   Skeleton — 骨架屏
+   ------------------------------------------------------------
+   规则
+   - 形状必须和真实内容一致，避免加载完成时跳动
+   - 只在首次加载用；刷新用顶部细进度条（见 .ui-loadbar）
+   - 动画用透明度呼吸，不用扫光（低端机更省电）
+
+   空 / 错误 / 加载状态见 states.css。
+   ============================================================ */
+
+.ui-skeleton {
+  border-radius: var(--r-sm);
+  background: rgba(var(--ink-rgb) / .08);
+  animation: ui-skeleton-pulse 1.6s var(--ease) infinite;
+}
+
+.ui-skeleton--text { height: 14px; }
+.ui-skeleton--title { height: 22px; width: 45%; }
+.ui-skeleton--line { height: 12px; }
+.ui-skeleton--line:nth-of-type(2) { width: 82%; }
+.ui-skeleton--line:nth-of-type(3) { width: 64%; }
+.ui-skeleton--avatar { width: 40px; height: 40px; border-radius: 14px; }
+.ui-skeleton--thumb { width: 64px; height: 64px; border-radius: var(--r-md); }
+.ui-skeleton--card { height: 96px; border-radius: var(--r-lg); }
+.ui-skeleton--chip { height: 28px; width: 64px; border-radius: var(--r-pill); }
+
+@keyframes ui-skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .45; }
+}
+
+/* —— 顶部细进度条：刷新 / 路由切换 —— */
+.ui-loadbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: calc(var(--z-toast) + 1);
+  height: 2px;
+  background: transparent;
+  overflow: hidden;
+}
+
+.ui-loadbar::after {
+  content: '';
+  display: block;
+  width: 40%;
+  height: 100%;
+  background: var(--accent);
+  animation: ui-loadbar 1.1s var(--ease) infinite;
+}
+
+.ui-loadbar[hidden] { display: none; }
+
+@keyframes ui-loadbar {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(350%); }
+}

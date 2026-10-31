@@ -1,0 +1,296 @@
+/* ============================================================
+   Tacto UI — Design Tokens
+   ------------------------------------------------------------
+   设计令牌层。集中定义主题颜色与通用字号、圆角、间距、玻璃、动效。
+   组件局部的图标、轨道等几何尺寸保留在组件样式中。
+   组件层禁止出现裸十六进制色值，一律引用这里的变量。
+
+   命名约定
+   - 原始令牌：--blue / --sp-4 / --r-lg      （值本身）
+   - 语义令牌：--text-primary / --bg-card    （用途，组件只用这一层）
+   - 主题变量：--accent                      （可被主题覆盖）
+   ============================================================ */
+
+:root {
+  color-scheme: light;
+
+  /* —— 基础色板 ——
+     文字三档由主墨色的透明度派生：在白卡上观感一致，
+     在带色页面上会自然带一点底色，整体更统一。 */
+  --ink-rgb: 20 24 35;          /* 主墨色 RGB，供透明度层级派生 */
+  --bg: #f2f4f7;                /* 页面底：中性浅灰，极轻冷调 */
+  --surface: #f7f8fa;           /* 次级表面 */
+  --surface-strong: #ffffff;    /* 卡片 */
+  --ink: rgb(var(--ink-rgb) / .92);
+  --muted: rgb(var(--ink-rgb) / .64);
+  --faint: rgb(var(--ink-rgb) / .62);
+  --line: rgba(24, 32, 48, .08);
+
+  /* —— 强调与功能色（只作点缀，不大面积铺） —— */
+  --blue: #2368f5;
+  --blue-deep: #1750c8;
+  --cyan: #52d6ef;
+  --violet: #7758f4;
+  --peach: #ff9c78;
+  --peach-deep: #b8532c;   /* 橙色柔和底上的文字色 */
+  --violet-soft: rgba(119, 88, 244, .12);
+  --mint: #2fbf9a;
+  --danger: #ff3b30;
+  --danger-soft: rgba(255, 59, 48, .09);
+  --peach-soft: rgba(255, 156, 120, .14);
+  --mint-soft: rgba(47, 191, 154, .13);
+
+  /* —— 语义角色：组件层只引用这一层 —— */
+  --text-primary: var(--ink);
+  --text-secondary: var(--muted);
+  --text-tertiary: var(--faint);
+  --text-disabled: rgb(var(--ink-rgb) / .32);
+  --text-on-accent: #ffffff;
+  /* 链接/图标强调色与承载白字的实色背景分别定义。 */
+  --action-bg: var(--accent);
+  --action-bg-hover: var(--accent-deep);
+  --bg-page: var(--bg);
+  --bg-card: var(--surface-strong);
+  --bg-card-soft: var(--surface);
+  --bg-field: #f5f6f9;
+  --border: var(--line);
+  --accent: var(--blue);
+  --accent-deep: var(--blue-deep);
+  --accent-soft: rgba(35, 104, 245, .09);
+  --success: #14765c;
+  --success-soft: var(--mint-soft);
+  --error: #c62828;
+  --error-fill: #cf2e25;
+  --error-soft: var(--danger-soft);
+  --warning: #936314;
+  --warning-soft: #faf0db;
+
+  /* —— 字体 ——
+     标题与控件用 MiSans（若设备已安装），正文回退系统栈，阅读优先。
+     不随包分发字体文件，因此没有加载成本与首屏闪烁。 */
+  --font-ui: "MiSans", "PingFang SC", "HarmonyOS Sans SC",
+    -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "HarmonyOS Sans SC", "MiSans", Roboto, "Noto Sans SC", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --fs-large-title: 28px;   /* Large Title / 展示标题 */
+  --fs-title-page: 22px;    /* Title / 页面标题 */
+  --fs-title-section: 18px; /* Headline / 分区标题 */
+  --fs-card-title: 16px;    /* 卡片标题 */
+  --fs-body: 15px;          /* 正文 */
+  --fs-body-small: 13px;    /* 辅助信息 */
+  --fs-meta: 12px;          /* Caption */
+  --fs-nav: 12px;           /* 底部标签 */
+
+  /* 字重整体取中间档：可变字体（MiSans VF 等）呈现真实字重，
+     静态字体设备就近映射到 700/600/400，任何平台都不会过重。 */
+  --fw-heavy: 700;
+  --fw-bold: 650;
+  --fw-semibold: 600;
+  --fw-medium: 550;
+  --fw-regular: 450;
+  --lh-body: 1.65;
+  --ls-tight: -.015em;
+  --ls-tighter: -.02em;
+
+  /* —— 间距：4dp 基础 + 语义令牌 —— */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --page-h: 20px;         /* 页面左右基础边距 */
+  --page-top: 16px;       /* 页面顶部内容间距（+ 安全区） */
+  --card-pad: 16px;       /* 普通卡片内边距 */
+  --card-pad-sm: 12px;    /* 紧凑卡片内边距 */
+  --card-pad-lg: 20px;    /* 大型卡片内边距 */
+  --btn-px: 20px;         /* 按钮横向内边距 */
+  --btn-py: 12px;         /* 按钮纵向内边距 */
+  --sec-gap: 32px;        /* 分区垂直间距 */
+  --touch: 48px;          /* 最小可点击高度 */
+
+  /* —— 圆角：连续、柔和、分层 —— */
+  --r-sm: 12px;   /* 小图 / 标签 */
+  --r-md: 16px;   /* 按钮 / 输入框 */
+  --r-lg: 20px;   /* 内容卡片 */
+  --r-xl: 24px;   /* 大型卡片 */
+  --r-2xl: 28px;  /* 弹层顶角 / 悬浮控件 */
+  --r-pill: 999px;
+
+  /* —— 玻璃三层：只用于控制层（导航 / 顶栏 / 悬浮按钮 / 弹层） ——
+     内容区一律用实色卡，避免通透感影响可读性。 */
+  /* tier-1 导航级 */
+  --glass-bg: linear-gradient(180deg, rgba(255, 255, 255, .74), rgba(250, 251, 253, .58));
+  --glass-border: 1px solid rgba(255, 255, 255, .65);
+  --glass-shadow: 0 14px 38px rgba(18, 26, 40, .13),
+    0 2px 8px rgba(18, 26, 40, .05),
+    inset 0 1px 0 rgba(255, 255, 255, .85),
+    inset 0 -.5px 0 rgba(30, 50, 90, .05);
+  --glass-blur: blur(28px) saturate(1.65);
+  /* tier-2 悬浮级 */
+  --glass-float-bg: linear-gradient(180deg, rgba(255, 255, 255, .82), rgba(248, 250, 253, .66));
+  --glass-float-shadow: 0 16px 40px rgba(18, 26, 40, .16),
+    0 3px 10px rgba(18, 26, 40, .07),
+    inset 0 1px 0 rgba(255, 255, 255, .9);
+  /* tier-3 表面级（更实，保证可读性） */
+  --glass-surface-bg: linear-gradient(180deg, rgba(255, 255, 255, .92), rgba(248, 250, 253, .88));
+  --glass-surface-shadow: 0 24px 60px rgba(18, 26, 40, .2),
+    inset 0 1px 0 rgba(255, 255, 255, .9);
+  /* 选中态玻璃 */
+  --glass-selected-bg: linear-gradient(180deg, rgba(255, 255, 255, .9), rgba(35, 104, 245, .1));
+  --glass-selected-border: 1px solid rgba(255, 255, 255, .9);
+
+  /* —— 阴影：柔和弥散，不重 —— */
+  --shadow-card: 0 10px 28px rgba(18, 26, 40, .06), 0 1px 3px rgba(18, 26, 40, .04);
+  --shadow-card-hover: 0 16px 40px rgba(18, 26, 40, .1), 0 2px 6px rgba(18, 26, 40, .05);
+  --shadow-soft: 0 6px 18px rgba(18, 26, 40, .05);
+
+  /* —— 布局 —— */
+  --dock-h: 74px;
+  --dock-inset: 16px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --dock-bottom: calc(14px + var(--safe-bottom));
+
+  /* —— 动效：快速、自然 —— */
+  --dur-fast: 140ms;
+  --dur-normal: 220ms;
+  --dur-slow: 300ms;
+  --ease: cubic-bezier(.22, .9, .28, 1);          /* 主曲线：快出缓停 */
+  --ease-out: cubic-bezier(.16, 1, .3, 1);        /* 入场 */
+  --ease-spring: cubic-bezier(.34, 1.45, .64, 1); /* 小幅弹性：点赞 / 按压 */
+  --scale-press: .96;
+  --scale-press-deep: .9;
+
+  /* —— 层级 —— */
+  --z-dock: 40;
+  --z-overlay: 60;
+  --z-toast: 80;
+
+  /* —— 深色底上的提示图标色（浅色模式下也用于深底轻提示） —— */
+  --on-dark-success: #4ade9f;
+  --on-dark-error: #ff8a80;
+}
+
+/* ============================================================
+   深色模式：单独定义角色，不做简单反相。
+   由 <html data-theme="dark"> 驱动；auto 模式由脚本同步该属性。
+   ============================================================ */
+html[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #0e1116;
+  --surface: #171b22;
+  --surface-strong: #1a1f27;
+  --ink-rgb: 236 240 248;
+  --ink: rgb(var(--ink-rgb) / .94);
+  --muted: rgb(var(--ink-rgb) / .62);
+  --faint: rgb(var(--ink-rgb) / .56);
+  --line: rgba(200, 212, 235, .1);
+  --blue: #5a8dff;
+  --blue-deep: #85b0ff;
+  --accent: var(--blue);
+  --accent-deep: #85b0ff;
+  --action-bg: #2368f5;
+  --action-bg-hover: #1750c8;
+  --accent-soft: rgba(90, 141, 255, .16);
+  --mint: #3ad0a8;
+  --success: #3ad0a8;
+  /* 浅色下的深色文字在深色底上不可读，需要单独提亮 */
+  --peach-deep: #ffb08f;
+  --violet: #a48bff;
+  --violet-soft: rgba(164, 139, 255, .18);
+  --cyan: #6fe3f7;
+  --peach: #ffab8c;
+  --danger: #ff453a;
+  --error: #ff8a80;
+  --error-fill: #cf2e25;
+  --danger-soft: rgba(255, 69, 58, .14);
+  --peach-soft: rgba(255, 156, 120, .18);
+  --mint-soft: rgba(58, 208, 168, .16);
+  --success-soft: rgba(58, 208, 168, .16);
+  --error-soft: rgba(255, 69, 58, .14);
+  --warning: #e9b65d;
+  --warning-soft: rgba(233, 182, 93, .16);
+  --bg-field: rgba(255, 255, 255, .05);
+
+  --glass-bg: linear-gradient(180deg, rgba(34, 39, 50, .78), rgba(24, 28, 36, .62));
+  --glass-border: 1px solid rgba(160, 180, 220, .14);
+  --glass-shadow: 0 14px 38px rgba(0, 0, 0, .4),
+    inset 0 1px 0 rgba(255, 255, 255, .07);
+  --glass-float-bg: linear-gradient(180deg, rgba(38, 44, 56, .86), rgba(26, 30, 40, .7));
+  --glass-float-shadow: 0 16px 40px rgba(0, 0, 0, .46),
+    inset 0 1px 0 rgba(255, 255, 255, .08);
+  --glass-surface-bg: linear-gradient(180deg, rgba(34, 39, 50, .95), rgba(24, 28, 36, .92));
+  --glass-surface-shadow: 0 24px 60px rgba(0, 0, 0, .55);
+  --glass-selected-bg: linear-gradient(180deg, rgba(255, 255, 255, .07), rgba(90, 141, 255, .18));
+  --glass-selected-border: 1px solid rgba(160, 190, 255, .18);
+
+  --shadow-card: 0 10px 28px rgba(0, 0, 0, .3), 0 1px 3px rgba(0, 0, 0, .2);
+  --shadow-card-hover: 0 16px 40px rgba(0, 0, 0, .4);
+  --shadow-soft: 0 6px 18px rgba(0, 0, 0, .25);
+}
+
+/* ============================================================
+   无障碍
+   ============================================================ */
+
+/* 高对比度：玻璃降级为实色，文字层级加深 */
+@media (prefers-contrast: more) {
+  :root {
+    --muted: #454c58;
+    --faint: #565e6b;
+    --line: rgba(18, 39, 70, .22);
+  }
+  html[data-theme='dark'] {
+    --muted: rgba(236, 240, 248, .78);
+    --faint: rgba(236, 240, 248, .62);
+    --line: rgba(200, 212, 235, .24);
+  }
+  .ui-glass {
+    background: var(--bg-card) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+}
+
+/* 从令牌层降级，覆盖所有使用玻璃材质的组件，不要求额外加 .ui-glass。 */
+@media (prefers-contrast: more), (prefers-reduced-transparency: reduce) {
+  :root,
+  html[data-theme='dark'] {
+    --glass-bg: var(--bg-card);
+    --glass-float-bg: var(--bg-card);
+    --glass-surface-bg: var(--bg-card);
+    --glass-selected-bg: var(--accent-soft);
+    --glass-blur: none;
+  }
+}
+
+/* 减少动画 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* 不支持 backdrop-filter 时降级为高不透明度实色 */
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  :root,
+  html[data-theme='dark'] {
+    --glass-bg: var(--bg-card);
+    --glass-float-bg: var(--bg-card);
+    --glass-surface-bg: var(--bg-card);
+    --glass-blur: none;
+  }
+  .ui-glass {
+    background: rgba(252, 253, 255, .97);
+  }
+  html[data-theme='dark'] .ui-glass {
+    background: rgba(26, 31, 39, .97);
+  }
+}
