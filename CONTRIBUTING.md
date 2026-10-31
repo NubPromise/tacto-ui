@@ -14,7 +14,7 @@ npm run check
 
 ```bash
 npm run dev
-# 分别打开 /test/behaviors.html 与 /test/components.html，标题都变成 ALL_PASS 才算通过
+# 分别打开 /test/behaviors.html、/test/components.html、/test/alerts.html，标题都变成 ALL_PASS 才算通过
 ```
 
 ## 改动约定

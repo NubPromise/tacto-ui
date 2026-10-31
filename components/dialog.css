@@ -81,3 +81,43 @@
   gap: var(--sp-4);
   margin-top: var(--sp-5);
 }
+
+/* —— 全局提示 / 确认：复用基础对话框，状态同时由图标和标题表达 —— */
+.ui-dialog--alert .ui-dialog__status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch);
+  height: var(--touch);
+  border-radius: var(--r-md);
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+.ui-dialog__status svg { width: var(--sp-6); height: var(--sp-6); }
+.ui-dialog--alert[data-type='info'] .ui-dialog__status {
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+}
+.ui-dialog--alert[data-type='success'] .ui-dialog__status {
+  background: var(--success-soft);
+  color: var(--success);
+}
+.ui-dialog--alert:is([data-type='error'], [data-type='danger']) .ui-dialog__status {
+  background: var(--error-soft);
+  color: var(--error);
+}
+.ui-dialog--alert .ui-dialog__title {
+  margin-top: var(--sp-4);
+  overflow-wrap: anywhere;
+}
+.ui-dialog--alert .ui-dialog__body {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.ui-dialog--alert .ui-dialog__actions { flex-wrap: wrap; }
+.ui-dialog--alert .ui-btn {
+  flex: 1;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}

@@ -161,8 +161,11 @@
 | `.ui-dialog__title` / `__body` / `__actions` | 结构 |
 | `.ui-dialog__actions--stack` | 纵向堆叠（超过两个操作时） |
 | `.ui-dialog__form` | 表单型内容 |
+| `.ui-dialog--alert` / `.ui-dialog__status` | 全局通用提示 / 确认及状态图标，由行为层自动创建 |
 
 危险操作：主按钮换 `--danger`，默认焦点放「取消」。
+
+全局调用使用 `behaviors/alert.js` 的 `alert()` / `confirm()`，支持 `info`、`success`、`warning`、`error`、`danger`。依赖 `button.css` 与 `dialog.css`，无需预写 HTML；完整参数与返回值见[行为 API](BEHAVIORS.md#alert--confirm-全局通用弹窗)。
 
 ---
 
@@ -455,7 +458,7 @@
 | Field | 否 | 原生控件 |
 | Switch | 否 | 原生 `checkbox` |
 | Skeleton / Empty | 否 | — |
-| Dialog | 是 | `createDialog` |
+| Dialog | 是 | 自定义结构用 `createDialog`；全局提示 / 确认用 `alert` / `confirm` |
 | Sheet | 是 | `createSheet` |
 | Toast | 是 | `createToaster` |
 | Segmented / Tabs | 是 | `createSegmented` |

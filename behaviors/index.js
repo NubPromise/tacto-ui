@@ -8,6 +8,7 @@
    ============================================================ */
 
 export { createDialog } from './dialog.js';
+export { alert, confirm } from './alert.js';
 export { createSheet } from './sheet.js';
 export { createToaster } from './toast.js';
 export { createSegmented } from './segmented.js';

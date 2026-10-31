@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tacto UI — 全局弹窗测试</title>
+  <link rel="stylesheet" href="../tokens/tokens.css">
+  <link rel="stylesheet" href="../components/base.css">
+  <link rel="stylesheet" href="../components/button.css">
+  <link rel="stylesheet" href="../components/dialog.css">
+</head>
+<body class="ui-page">
+<button class="ui-btn" id="opener" type="button">触发弹窗</button>
+<pre id="out"></pre>
+<script type="module">
+import { alert as showAlert, confirm as showConfirm, lockScroll } from '../behaviors/index.js';
+
+const results = [];
+const check = (name, value) => results.push(`${value ? 'PASS' : 'FAIL'} ${name}`);
+const current = () => document.querySelector('dialog.ui-dialog--alert');
+const press = (action) => current().querySelector(`[data-action="${action}"]`).click();
+const cancel = () => current().dispatchEvent(new Event('cancel', { cancelable: true }));
+const opener = document.getElementById('opener');
+
+try {
+  opener.focus();
+  let pending = showAlert('<b>请注意</b>\n保留换行');
+  let dialog = current();
+  check('直接调用自动挂载并打开警告弹窗', dialog.open && dialog.dataset.type === 'warning');
+  check('alertdialog 关联标题和说明', dialog.getAttribute('role') === 'alertdialog'
+    && document.getElementById(dialog.getAttribute('aria-labelledby')).textContent === '请注意'
+    && document.getElementById(dialog.getAttribute('aria-describedby')) === dialog.querySelector('p'));
+  check('文案作为纯文本保留换行，不解析 HTML', !dialog.querySelector('b')
+    && dialog.querySelector('p').textContent === '<b>请注意</b>\n保留换行');
+  check('单按钮提示默认聚焦确认', document.activeElement.dataset.action === 'confirm');
+  check('弹窗打开时锁定滚动', document.documentElement.style.overflow === 'hidden');
+  dialog.dispatchEvent(new MouseEvent('click', { clientX: 0, clientY: 0 }));
+  check('默认点击遮罩不关闭', dialog.open);
+  press('confirm');
+  check('确认返回 true', await pending === true);
+  check('关闭移除 DOM、释放滚动并还原焦点', !current()
+    && document.documentElement.style.overflow === '' && document.activeElement === opener);
+
+  pending = showConfirm({ type: 'danger', title: '删除附件？', message: '删除后无法恢复。', confirmText: '删除', cancelText: '保留' });
+  dialog = current();
+  check('危险确认使用危险按钮及自定义文案', dialog.querySelector('.ui-btn--danger').textContent === '删除'
+    && dialog.querySelector('[data-action="cancel"]').textContent === '保留');
+  check('确认默认聚焦取消', document.activeElement.dataset.action === 'cancel');
+  press('cancel');
+  check('取消返回 false', await pending === false);
+
+  pending = showConfirm('继续操作？');
+  press('confirm');
+  check('confirm 确认返回 true', await pending === true);
+
+  pending = showAlert('按 Esc 退出');
+  cancel();
+  check('Esc 返回 false', await pending === false);
+
+  pending = showConfirm({ message: '只能通过按钮关闭', closeOnEscape: false });
+  cancel();
+  check('可禁用 Esc，仍保留取消按钮', current().open);
+  press('cancel');
+  await pending;
+
+  pending = showConfirm({ message: '点击遮罩退出', closeOnBackdrop: true });
+  dialog = current();
+  const rect = dialog.getBoundingClientRect();
+  dialog.dispatchEvent(new MouseEvent('click', { clientX: rect.left + 2, clientY: rect.top + 2 }));
+  check('点击对话框内部留白不误关闭', dialog.open);
+  dialog.dispatchEvent(new MouseEvent('click', { clientX: rect.left - 1, clientY: rect.top - 1 }));
+  check('允许点遮罩时返回 false', await pending === false);
+
+  const first = showConfirm({ title: '第一条', message: '先显示此条' });
+  const second = showAlert({ title: '第二条', message: '然后显示此条' });
+  check('并发调用只打开一个弹窗且不覆盖内容', document.querySelectorAll('dialog.ui-dialog--alert').length === 1
+    && current().querySelector('h2').textContent === '第一条');
+  press('cancel');
+  await first;
+  check('前一条关闭后显示下一条', current().querySelector('h2').textContent === '第二条');
+  press('confirm');
+  check('排队请求各自返回结果并归还原触发器焦点', await second === true && document.activeElement === opener && !current());
+
+  const release = lockScroll();
+  pending = showAlert({ type: 'success' });
+  check('只有标题时不生成空的 aria-describedby', !current().hasAttribute('aria-describedby'));
+  press('confirm');
+  await pending;
+  check('关闭不会释放其他弹层持有的滚动锁', document.documentElement.style.overflow === 'hidden');
+  release();
+
+  pending = showConfirm({
+    message: 'https://example.com/' + 'long-path-'.repeat(40),
+    confirmText: 'Confirm and permanently remove this record',
+    cancelText: 'Keep the original record unchanged',
+  });
+  dialog = current();
+  dialog.style.width = '288px'; // 模拟 320px 屏幕减去两侧 16px 留白。
+  check('窄弹窗的长链接和长按钮文案换行且不溢出', dialog.scrollWidth <= dialog.clientWidth
+    && [...dialog.querySelectorAll('button')].every((button) => button.offsetHeight >= 48
+      && button.scrollWidth <= button.clientWidth));
+  press('cancel');
+  await pending;
+
+  for (const type of ['info', 'success', 'warning', 'error', 'danger']) {
+    pending = showAlert({ type, title: '<img src=x>', message: '说明'.repeat(150), confirmText: '<b>确认</b>' });
+    dialog = current();
+    check(`${type} 状态与图标存在，标题和按钮不解析 HTML`, dialog.dataset.type === type
+      && !!dialog.querySelector('svg path') && !dialog.querySelector('img, b'));
+    check(`${type} 长文案不横向溢出且按钮保留触控高度`, dialog.scrollWidth <= dialog.clientWidth
+      && dialog.offsetWidth <= document.documentElement.clientWidth
+      && dialog.querySelector('button').offsetHeight >= 48);
+    press('confirm');
+    await pending;
+  }
+
+  let rejected = 0;
+  for (const input of [null, [], { type: 'unknown' }]) {
+    try { await showAlert(input); } catch (error) { if (error instanceof TypeError) rejected++; }
+  }
+  check('无效参数拒绝 Promise 且不残留弹窗', rejected === 3 && !current());
+  pending = showAlert('错误之后仍可正常使用');
+  press('confirm');
+  check('无效调用不会阻断后续弹窗', await pending === true);
+} catch (error) {
+  results.push(`FAIL 未预期异常：${error.stack}`);
+}
+
+document.getElementById('out').textContent = results.join('\n');
+document.title = results.some((line) => line.startsWith('FAIL')) ? 'FAILED' : 'ALL_PASS';
+</script>
+</body>
+</html>

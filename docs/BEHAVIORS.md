@@ -5,10 +5,50 @@
 每个模块无依赖，可以单独 import：
 
 ```js
-import { createDialog, createSheet, createToaster, createSegmented, createSelect, createPullRefresh } from './behaviors/index.js';
+import { alert, confirm, createDialog, createSheet, createToaster, createSegmented, createSelect, createPullRefresh } from './behaviors/index.js';
 ```
 
 带事件监听的工厂函数返回 `destroy()` 用于解绑；Toaster 使用 `clear()` 清理当前提示。弹层重复调用 `open()` 不会出错。
+
+---
+
+## alert / confirm 全局通用弹窗
+
+用于必须确认已读的警告、错误提示，以及需要用户明确决定的操作。自动创建并清理 `<dialog>`，无需预写弹窗 HTML。加载 `tokens/tokens.css`、`components/base.css`、`components/button.css`、`components/dialog.css` 后即可调用：
+
+```js
+import { alert as showAlert, confirm as showConfirm } from './behaviors/index.js';
+// 也可直接从 './behaviors/alert.js' 导入。
+
+await showAlert('当前设置可能影响已有数据，请检查后继续。');
+
+const confirmed = await showConfirm({
+  type: 'danger',
+  title: '删除这条记录？',
+  message: '删除后无法恢复，与它关联的附件也会移除。',
+  confirmText: '删除记录',
+  cancelText: '保留记录',
+});
+if (confirmed) await deleteRecord(); // 业务操作由接入项目提供
+```
+
+| 选项 | 默认 | 说明 |
+|---|---|---|
+| `title` | 随 `type` 变化 | 标题：提示 / 操作成功 / 请注意 / 操作未完成 / 确认危险操作 |
+| `message` | `''` | 正文，支持换行；也可直接传一个字符串 |
+| `type` | `'warning'` | `info` / `success` / `warning` / `error` / `danger`；危险操作使用 `danger` |
+| `confirmText` | alert：`'知道了'`；confirm：`'确定'` | 确认按钮文案，建议写具体动作 |
+| `cancelText` | `'取消'` | 仅 confirm 显示取消按钮 |
+| `closeOnEscape` | `true` | 是否允许 Esc 关闭 |
+| `closeOnBackdrop` | `false` | 是否允许点击遮罩关闭；点击框内留白不关闭 |
+
+两个接口都返回 **`Promise<boolean>`**：点击确认返回 `true`，取消、Esc 或允许的遮罩关闭返回 `false`。无效参数返回被拒绝的 Promise。只有 `true` 才应执行后续业务操作。
+
+**全局复用：** 各页面导入同一模块后共享一个队列，连续调用按顺序显示，不覆盖待确认内容。关闭后移除 DOM、释放当前滚动锁并还原触发器焦点。不挂载或替换 `window.alert` / `window.confirm`；推荐用上例的别名避免与浏览器原生 API 混淆。
+
+**无障碍与安全：** 使用 `role="alertdialog"` 并关联标题和说明；确认框默认聚焦「取消」，单按钮提示聚焦「知道了」。标题、正文、按钮均按纯文本插入，不支持 HTML。焦点陷阱与键盘按钮激活由原生 `<dialog>` 提供，主题沿用页面令牌。普通、不需要确认的信息优先用 Toast 或页面内提示条。
+
+浏览器断言见 [`test/alerts.html`](../test/alerts.html)，组件总览的「对话框」区域提供五种可操作演示。
 
 ---
 
@@ -191,6 +231,8 @@ import { getFocusable, focusFirst, lockScroll, trapFocus } from './behaviors/foc
 ## 浏览器测试
 
 `test/behaviors.html` 是一组无依赖的浏览器断言，覆盖焦点归还、滚动锁定引用计数、提示替换、键盘切换，以及下拉框的浏览 / 提交 / 取消、多实例、禁用选项和销毁等行为。
+
+`test/alerts.html` 加载真实组件 CSS，验证全局弹窗的确认 / 取消、队列、焦点、滚动锁、关闭策略、状态与纯文本插入。
 
 `test/components.html` 加载真实组件 CSS，验证蓝色 / 紫色两套品牌的深浅色文字对比度、48px 点击区域、列表与布局工具隔离，以及表单内下拉按钮不会误提交。它同时是可操作的组合示例。
 

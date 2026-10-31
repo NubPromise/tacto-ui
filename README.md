@@ -16,7 +16,7 @@
 - **直接引入，按需组合。** 共享设计令牌与基础样式，每个组件独立成文件。无需打包器、CSS 预处理器或前端框架，静态服务器即可运行。
 - **统一的视觉语言。** 实色内容区、轻量控制层、克制的动效；主题角色与通用尺度集中定义，局部几何尺寸留在组件中，方便理解和修改。
 - **深浅色分别设计。** 独立定义表面、文字、强调色与操作背景；响应高对比度、减少透明度和减少动画偏好，玻璃效果提供实色降级。
-- **交互按需接入。** 对话框、底部面板、提示、分段控件、下拉和下拉刷新提供原生 JavaScript 模块，处理相应的焦点、键盘或手势行为。
+- **交互按需接入。** 全局警告与确认弹窗一行调用，无需预写 HTML；对话框、底部面板、提示、分段控件、下拉和下拉刷新提供原生 JavaScript 模块，处理相应的焦点、键盘或手势行为。
 - **移动端细节有据可循。** 提供安全区适配、键盘焦点环、原生控件语义与触控区域规范；主要操作采用 48px 目标，紧凑按钮 `--sm` 为 40px。
 
 ## 适用场景
@@ -54,6 +54,7 @@ npm run dev
 | 组件总览 | [http://127.0.0.1:4173/](http://127.0.0.1:4173/) | 组件、变体、页面模板，可切换深浅色与跟随系统 |
 | 组合示例 | [http://127.0.0.1:4173/test/components.html](http://127.0.0.1:4173/test/components.html) | 可操作的设置表单、内容互动，以及蓝色 / 紫色双品牌主题 |
 | 行为验证 | [http://127.0.0.1:4173/test/behaviors.html](http://127.0.0.1:4173/test/behaviors.html) | 焦点、键盘、下拉提交与取消等行为断言 |
+| 全局弹窗验证 | [http://127.0.0.1:4173/test/alerts.html](http://127.0.0.1:4173/test/alerts.html) | 确认结果、队列、关闭策略、焦点与长文案断言 |
 
 默认端口为 `4173`，可用 `npm run dev -- 4180` 指定其他端口。Node.js 仅用于本地工具；页面可部署到静态站点或集成到现有应用。
 
@@ -107,7 +108,29 @@ npm run dev
 
 `base.css` 包含全局重置与基础排版；接入已有站点时，先确认这些规则与现有样式的关系。`index.html` 中的内联 CSS 仅服务于组件展示页，接入时使用组件自己的文件。
 
-纯样式组件无需初始化。需要交互时，可像上例一样直接导入单个模块，也可从 `behaviors/index.js` 按名称导入：`createDialog`、`createSheet`、`createToaster`、`createSegmented`、`createSelect`、`createPullRefresh`。各模块所需的 HTML、参数和清理方式见[行为 API](docs/BEHAVIORS.md)。
+纯样式组件无需初始化。需要交互时，可像上例一样直接导入单个模块，也可从 `behaviors/index.js` 按名称导入：`alert`、`confirm`、`createDialog`、`createSheet`、`createToaster`、`createSegmented`、`createSelect`、`createPullRefresh`。各模块所需的 HTML、参数和清理方式见[行为 API](docs/BEHAVIORS.md)。
+
+### 全局警告与确认弹窗
+
+先按上述顺序加载 `tokens.css`、`base.css`、`button.css` 和 `dialog.css`，然后在任意页面调用，无需额外 HTML：
+
+```js
+import { alert as showAlert, confirm as showConfirm } from './behaviors/index.js';
+
+await showAlert('请检查配置后再继续。');
+
+const confirmed = await showConfirm({
+  type: 'danger',
+  title: '删除这条记录？',
+  message: '删除后无法恢复。',
+  confirmText: '删除记录',
+});
+if (confirmed) {
+  // 在这里执行删除操作。
+}
+```
+
+支持提示、成功、警告、错误与危险操作五种状态，连续调用依次显示。确认返回 `true`，取消 / Esc 返回 `false`，默认点击遮罩不关闭；关闭后自动清理并归还焦点。更多选项见[全局弹窗 API](docs/BEHAVIORS.md#alert--confirm-全局通用弹窗)。
 
 ## 切换主题与定制品牌
 
@@ -179,9 +202,10 @@ npm run dev
 `check` 检查文件引用、CSS 基础规则、深色令牌覆盖，以及模块和测试页脚本语法。运行本地服务后，再在浏览器中打开：
 
 - [`test/behaviors.html`](test/behaviors.html)：焦点归还、滚动锁定、提示替换、键盘切换、下拉提交与取消等行为断言。
+- [`test/alerts.html`](test/alerts.html)：全局警告 / 确认的返回结果、队列、焦点、滚动锁、关闭策略与纯文本安全断言。
 - [`test/components.html`](test/components.html)：使用真实 CSS 验证双品牌深浅色文字对比度、点击范围、布局隔离与表单行为，并提供可操作的组合示例。
 
-两页均以标题 `ALL_PASS` 为通过标志。静态自检与这些断言覆盖的具体项目见[贡献指南](CONTRIBUTING.md)；接入项目仍需验证自己的文案、内容和目标设备。
+三页均以标题 `ALL_PASS` 为通过标志。静态自检与这些断言覆盖的具体项目见[贡献指南](CONTRIBUTING.md)；接入项目仍需验证自己的文案、内容和目标设备。
 
 欢迎带着实际页面中的问题来改进组件、示例和文档。提交前请阅读[贡献指南](CONTRIBUTING.md)，并在[更新日志](CHANGELOG.md)的「未发布」部分记录变更。
 

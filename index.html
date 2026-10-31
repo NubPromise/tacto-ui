@@ -963,6 +963,18 @@
       </div>
 
       <div class="spec-tip"><strong>规范：</strong>标题一句话说清结果，正文补充后果；按钮右对齐、主操作在最右；按钮不超过两个，超过两个改用底部面板的操作表。</div>
+
+      <div class="demo">
+        <div class="demo__label"><span>全局通用弹窗 · 无需预写 HTML</span><code>alert() / confirm()</code></div>
+        <div class="demo__body">
+          <button class="ui-btn" type="button" data-global-alert="warning">通用警告</button>
+          <button class="ui-btn" type="button" data-global-alert="error">错误提示</button>
+          <button class="ui-btn" type="button" data-global-alert="success">成功提示</button>
+          <button class="ui-btn" type="button" data-global-alert="confirm">操作确认</button>
+          <button class="ui-btn ui-btn--danger" type="button" data-global-alert="danger">危险操作</button>
+        </div>
+      </div>
+      <div class="spec-tip">从 <code>behaviors/index.js</code> 导入 <code>alert</code> / <code>confirm</code>，传入文本或选项对象。返回 <code>Promise&lt;boolean&gt;</code>；只有点击确认才返回 <code>true</code>。多个调用依次显示，默认禁止点遮罩关闭。</div>
     </section>
 
     <!-- ============ 底部面板 ============ -->
@@ -1338,7 +1350,7 @@
 <div class="ui-toast-region" id="toast-region" aria-live="polite"></div>
 
 <script type="module">
-  import { createDialog, createSheet, createToaster, createSegmented, createSelect } from './behaviors/index.js';
+  import { alert as showAlert, confirm as showConfirm, createDialog, createSheet, createToaster, createSegmented, createSelect } from './behaviors/index.js';
 
   // —— 主题 ——
   const html = document.documentElement;
@@ -1401,6 +1413,27 @@
 
   // —— 轻提示：单实例替换、自动离场、role 随类型切换 ——
   const toast = createToaster(document.getElementById('toast-region'));
+  document.querySelectorAll('[data-global-alert]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const type = btn.dataset.globalAlert;
+      if (type === 'danger' || type === 'confirm') {
+        const confirmed = await showConfirm({
+          type: type === 'danger' ? 'danger' : 'info',
+          title: type === 'danger' ? '删除这条记录？' : '保存这次修改？',
+          message: type === 'danger' ? '删除后无法恢复，请确认你不再需要这条记录。' : '保存后会同步到所有已登录的设备。',
+          confirmText: type === 'danger' ? '删除记录' : '保存修改',
+        });
+        toast.show(confirmed ? '你选择了确认（演示）' : '已取消');
+      } else {
+        const messages = {
+          warning: '当前设置可能影响已有数据。请检查配置后再继续。',
+          error: '暂时无法保存修改。请检查网络连接后重试。',
+          success: '设置已保存，下次打开页面时将自动应用。',
+        };
+        await showAlert({ type, message: messages[type] });
+      }
+    });
+  });
   const ICONS = {
     success: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg>',
     error: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>',
